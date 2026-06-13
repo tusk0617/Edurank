@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Colors from '../../constants/Colors';
 
 export default function ProgressBar({ value = 0, color = Colors.primary, showLabel = false, height = 8 }) {
-  const pct = Math.min(100, Math.max(0, value));
+  const pct = Math.min(100, Math.max(0, isNaN(value) ? 0 : value || 0));
   return (
     <View>
       <View style={[styles.track, { height }]}>
