@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
-  Animated, ActivityIndicator,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -24,9 +24,7 @@ export default function AssessmentSoalScreen() {
   const [hasil, setHasil] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  // Score animation
-  const scoreAnim = useRef(new Animated.Value(0)).current;
+  const [displaySkor, setDisplaySkor] = useState(0);
 
   useEffect(() => {
     fetchSoal();
@@ -72,13 +70,8 @@ export default function AssessmentSoalScreen() {
       submitAssessment(id, { sesi_id: sesiId, jawaban: jawabanArr })
         .then(res => {
           setHasil(res.data);
+          setDisplaySkor(Math.round(res.data.skor));
           setScreen(SCREENS.HASIL);
-          scoreAnim.setValue(0);
-          Animated.timing(scoreAnim, {
-            toValue: res.data.skor,
-            duration: 1500,
-            useNativeDriver: false,
-          }).start();
         })
         .catch(err => {
           Alert.alert('Error', err.response?.data?.message || 'Gagal submit');
@@ -131,11 +124,9 @@ export default function AssessmentSoalScreen() {
             style={{ marginBottom: 8 }}
           />
 
-          <Animated.Text style={[styles.skorText, { color: hasil.lulus ? Colors.secondary : Colors.danger }]}>
-            {scoreAnim.interpolate({ inputRange: [0, 100], outputRange: ['0', '100'] }).__getValue
-              ? Math.round(scoreAnim.__getValue())
-              : hasil.skor.toFixed(0)}
-          </Animated.Text>
+          <Text style={[styles.skorText, { color: hasil.lulus ? Colors.secondary : Colors.danger }]}>
+            {displaySkor}
+          </Text>
 
           <Text style={[styles.lulusText, { color: hasil.lulus ? Colors.secondary : Colors.danger }]}>
             {hasil.lulus ? '🎉 LULUS!' : 'BELUM LULUS'}
@@ -164,7 +155,7 @@ export default function AssessmentSoalScreen() {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={[styles.actionBtnSolid, { backgroundColor: Colors.primary }]} onPress={() => router.replace('/(tabs)')}>
+          <TouchableOpacity style={[styles.actionBtnSolid, { backgroundColor: Colors.primary }]} onPress={() => router.replace('/(tabs)/home')}>
             <Text style={styles.actionBtnSolidText}>🏠 Kembali ke Beranda</Text>
           </TouchableOpacity>
         </ScrollView>
