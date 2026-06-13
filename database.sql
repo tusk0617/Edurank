@@ -203,31 +203,47 @@ INSERT INTO sekolah (nama_sekolah, alamat, wilayah) VALUES
 ('SMAN 4 Jakarta Barat', 'Jl. Raya Kembangan, Kembangan', 'Jakarta Barat'),
 ('SMAN 5 Jakarta Barat', 'Jl. Cengkareng Raya, Cengkareng', 'Jakarta Barat');
 
--- Mata Pelajaran (hanya Matematika)
+-- Sub-Topik Matematika (sebagai mata_pelajaran)
 INSERT INTO mata_pelajaran (id, nama, warna_hex) VALUES
-(1, 'Matematika', '#378ADD');
+(1, 'Aljabar',       '#378ADD'),
+(2, 'Trigonometri',  '#E24B4A'),
+(3, 'Statistika',    '#639922'),
+(4, 'Geometri',      '#9B59B6'),
+(5, 'Kalkulus',      '#EF9F27');
 
 -- Badge
 INSERT INTO badge (id, nama, deskripsi, ikon_nama, warna_hex) VALUES
-(1, 'Pemula', 'Menyelesaikan modul pertama', 'star-outline', '#EF9F27'),
-(2, 'Rajin Belajar', 'Menyelesaikan 5 modul', 'book', '#378ADD'),
-(3, 'Juara Kelas', 'Masuk top 3 leaderboard', 'trophy', '#EF9F27'),
-(4, 'Pantang Menyerah', 'Berhasil lulus setelah remedial', 'refresh-circle', '#639922'),
-(5, 'Ahli Matematika', 'Menyelesaikan semua modul Matematika', 'calculator', '#E24B4A'),
-(6, 'Nilai Sempurna', 'Mendapat skor 100 dalam ujian', 'ribbon', '#9B59B6');
+(1, 'Pemula',           'Menyelesaikan modul pertama',              'star-outline',    '#EF9F27'),
+(2, 'Rajin Belajar',    'Menyelesaikan 5 modul',                    'book',            '#378ADD'),
+(3, 'Juara Kelas',      'Masuk top 3 leaderboard',                  'trophy',          '#EF9F27'),
+(4, 'Pantang Menyerah', 'Berhasil lulus setelah remedial',          'refresh-circle',  '#639922'),
+(5, 'Ahli Matematika',  'Menyelesaikan semua sub-topik',            'calculator',      '#E24B4A'),
+(6, 'Nilai Sempurna',   'Mendapat skor 100 dalam ujian',            'ribbon',          '#9B59B6');
 
--- Modul Matematika (10 modul, urutan dari mudah ke sulit)
+-- Modul Aljabar (mapel_id=1)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(1,  1, 'Aljabar Dasar',         'Mempelajari operasi aljabar dasar termasuk persamaan linear dan pertidaksamaan.', 1, 1,  30,  50),
-(2,  1, 'Persamaan Kuadrat',     'Memahami cara menyelesaikan persamaan kuadrat dengan berbagai metode.', 1, 2,  35,  60),
-(3,  1, 'Fungsi dan Grafik',     'Memahami konsep fungsi, domain, kodomain, dan representasi grafik.', 2, 3,  45,  80),
-(4,  1, 'Barisan dan Deret',     'Mempelajari barisan aritmetika dan geometri serta deret tak hingga.', 2, 4,  45,  80),
-(5,  1, 'Trigonometri Dasar',    'Mempelajari rasio trigonometri, sudut istimewa, dan identitas dasar.', 2, 5,  50,  90),
-(6,  1, 'Trigonometri Lanjutan', 'Memahami rumus jumlah sudut, persamaan trigonometri, dan grafik fungsi trig.', 3, 6,  60, 120),
-(7,  1, 'Statistika Dasar',      'Memahami konsep statistik deskriptif, mean, median, modus, dan penyebaran data.', 2, 7,  40,  70),
-(8,  1, 'Peluang',               'Mempelajari konsep peluang, permutasi, kombinasi, dan distribusi peluang.', 2, 8,  45,  80),
-(9,  1, 'Vektor',                'Memahami operasi vektor, dot product, cross product, dan penerapannya.', 3, 9,  55, 110),
-(10, 1, 'Kalkulus Dasar',        'Pengantar limit, turunan, dan integral sebagai dasar kalkulus SMA.', 3, 10, 60, 120);
+(1, 1, 'Aljabar Dasar',     'Mempelajari operasi aljabar dasar termasuk persamaan linear dan pertidaksamaan.', 1, 1, 30, 50),
+(2, 1, 'Persamaan Kuadrat', 'Memahami cara menyelesaikan persamaan kuadrat dengan berbagai metode.',          1, 2, 35, 60),
+(3, 1, 'Fungsi dan Grafik', 'Memahami konsep fungsi, domain, kodomain, dan representasi grafik.',             2, 3, 45, 80),
+(4, 1, 'Barisan dan Deret', 'Mempelajari barisan aritmetika dan geometri serta deret tak hingga.',            2, 4, 45, 80);
+
+-- Modul Trigonometri (mapel_id=2)
+INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
+(5, 2, 'Trigonometri Dasar',    'Mempelajari rasio trigonometri, sudut istimewa, dan identitas dasar.',              2, 1, 50,  90),
+(6, 2, 'Trigonometri Lanjutan', 'Memahami rumus jumlah sudut, persamaan trigonometri, dan grafik fungsi trig.',      3, 2, 60, 120);
+
+-- Modul Statistika (mapel_id=3)
+INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
+(7, 3, 'Statistika Dasar', 'Memahami konsep statistik deskriptif, mean, median, modus, dan penyebaran data.', 2, 1, 40, 70),
+(8, 3, 'Peluang',          'Mempelajari konsep peluang, permutasi, kombinasi, dan distribusi peluang.',        2, 2, 45, 80);
+
+-- Modul Geometri (mapel_id=4)
+INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
+(9, 4, 'Vektor', 'Memahami operasi vektor, dot product, cross product, dan penerapannya.', 3, 1, 55, 110);
+
+-- Modul Kalkulus (mapel_id=5)
+INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
+(10, 5, 'Kalkulus Dasar', 'Pengantar limit, turunan, dan integral sebagai dasar kalkulus SMA.', 3, 1, 60, 120);
 
 -- Soal Modul 1: Aljabar Dasar
 INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES
@@ -289,13 +305,14 @@ INSERT INTO users (nama, email, password, role, sekolah_id) VALUES
 ('Eka Putri',     'siswa5@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 5),
 ('Pak Guru',      'guru1@test.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'guru',  1);
 
--- Modul Progress awal (modul 1 tersedia untuk semua siswa)
+-- Modul Progress awal (modul pertama tiap sub-topik tersedia untuk semua siswa)
+-- Aljabar=1, Trigonometri=5, Statistika=7, Geometri=9, Kalkulus=10
 INSERT INTO modul_progress (user_id, modul_id, status) VALUES
-(1, 1, 'tersedia'),
-(2, 1, 'tersedia'),
-(3, 1, 'tersedia'),
-(4, 1, 'tersedia'),
-(5, 1, 'tersedia');
+(1, 1, 'tersedia'), (1, 5, 'tersedia'), (1, 7, 'tersedia'), (1, 9, 'tersedia'), (1, 10, 'tersedia'),
+(2, 1, 'tersedia'), (2, 5, 'tersedia'), (2, 7, 'tersedia'), (2, 9, 'tersedia'), (2, 10, 'tersedia'),
+(3, 1, 'tersedia'), (3, 5, 'tersedia'), (3, 7, 'tersedia'), (3, 9, 'tersedia'), (3, 10, 'tersedia'),
+(4, 1, 'tersedia'), (4, 5, 'tersedia'), (4, 7, 'tersedia'), (4, 9, 'tersedia'), (4, 10, 'tersedia'),
+(5, 1, 'tersedia'), (5, 5, 'tersedia'), (5, 7, 'tersedia'), (5, 9, 'tersedia'), (5, 10, 'tersedia');
 
 -- Sample Poin Log (untuk demo leaderboard)
 INSERT INTO poin_log (user_id, jumlah, tipe, keterangan) VALUES
