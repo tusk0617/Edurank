@@ -13,11 +13,12 @@ function AuthGuard({ children }) {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const onLoginPage = segments[0] === 'login';
+    const onTabs = segments[0] === '(tabs)';
 
-    if (!isLoggedIn && !inAuthGroup) {
+    if (!isLoggedIn && !onLoginPage) {
       router.replace('/login');
-    } else if (isLoggedIn && inAuthGroup) {
+    } else if (isLoggedIn && onLoginPage) {
       router.replace('/(tabs)');
     }
   }, [isLoggedIn, isLoading, segments]);
