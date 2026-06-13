@@ -1,6 +1,6 @@
 -- ============================================================
 -- FrontSchooler Database Schema
--- Created for Skripsi S1 - BINUS University
+-- Fokus: Pembelajaran Matematika SMA Jakarta Barat
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS edurank CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -203,11 +203,9 @@ INSERT INTO sekolah (nama_sekolah, alamat, wilayah) VALUES
 ('SMAN 4 Jakarta Barat', 'Jl. Raya Kembangan, Kembangan', 'Jakarta Barat'),
 ('SMAN 5 Jakarta Barat', 'Jl. Cengkareng Raya, Cengkareng', 'Jakarta Barat');
 
--- Mata Pelajaran
-INSERT INTO mata_pelajaran (nama, warna_hex) VALUES
-('Matematika', '#378ADD'),
-('Bahasa Indonesia', '#639922'),
-('Bahasa Inggris', '#EF9F27');
+-- Mata Pelajaran (hanya Matematika)
+INSERT INTO mata_pelajaran (id, nama, warna_hex) VALUES
+(1, 'Matematika', '#378ADD');
 
 -- Badge
 INSERT INTO badge (id, nama, deskripsi, ikon_nama, warna_hex) VALUES
@@ -215,82 +213,99 @@ INSERT INTO badge (id, nama, deskripsi, ikon_nama, warna_hex) VALUES
 (2, 'Rajin Belajar', 'Menyelesaikan 5 modul', 'book', '#378ADD'),
 (3, 'Juara Kelas', 'Masuk top 3 leaderboard', 'trophy', '#EF9F27'),
 (4, 'Pantang Menyerah', 'Berhasil lulus setelah remedial', 'refresh-circle', '#639922'),
-(5, 'All Rounder', 'Mengumpulkan 500 poin', 'trophy', '#E24B4A');
+(5, 'Ahli Matematika', 'Menyelesaikan semua modul Matematika', 'calculator', '#E24B4A'),
+(6, 'Nilai Sempurna', 'Mendapat skor 100 dalam ujian', 'ribbon', '#9B59B6');
 
--- Modul Matematika
-INSERT INTO modul (mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(1, 'Aljabar Dasar', 'Mempelajari operasi aljabar dasar termasuk persamaan linear dan pertidaksamaan.', 1, 1, 30, 50),
-(1, 'Fungsi dan Grafik', 'Memahami konsep fungsi, domain, kodomain, dan representasi grafik.', 2, 2, 45, 80),
-(1, 'Trigonometri', 'Mempelajari rasio trigonometri, identitas, dan penerapannya.', 3, 3, 60, 120),
-(1, 'Statistika Dasar', 'Memahami konsep statistik deskriptif, distribusi data, dan analisis dasar.', 2, 4, 45, 80);
+-- Modul Matematika (10 modul, urutan dari mudah ke sulit)
+INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
+(1,  1, 'Aljabar Dasar',         'Mempelajari operasi aljabar dasar termasuk persamaan linear dan pertidaksamaan.', 1, 1,  30,  50),
+(2,  1, 'Persamaan Kuadrat',     'Memahami cara menyelesaikan persamaan kuadrat dengan berbagai metode.', 1, 2,  35,  60),
+(3,  1, 'Fungsi dan Grafik',     'Memahami konsep fungsi, domain, kodomain, dan representasi grafik.', 2, 3,  45,  80),
+(4,  1, 'Barisan dan Deret',     'Mempelajari barisan aritmetika dan geometri serta deret tak hingga.', 2, 4,  45,  80),
+(5,  1, 'Trigonometri Dasar',    'Mempelajari rasio trigonometri, sudut istimewa, dan identitas dasar.', 2, 5,  50,  90),
+(6,  1, 'Trigonometri Lanjutan', 'Memahami rumus jumlah sudut, persamaan trigonometri, dan grafik fungsi trig.', 3, 6,  60, 120),
+(7,  1, 'Statistika Dasar',      'Memahami konsep statistik deskriptif, mean, median, modus, dan penyebaran data.', 2, 7,  40,  70),
+(8,  1, 'Peluang',               'Mempelajari konsep peluang, permutasi, kombinasi, dan distribusi peluang.', 2, 8,  45,  80),
+(9,  1, 'Vektor',                'Memahami operasi vektor, dot product, cross product, dan penerapannya.', 3, 9,  55, 110),
+(10, 1, 'Kalkulus Dasar',        'Pengantar limit, turunan, dan integral sebagai dasar kalkulus SMA.', 3, 10, 60, 120);
 
--- Modul Bahasa Indonesia
-INSERT INTO modul (mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(2, 'Teks Narasi', 'Memahami struktur, ciri kebahasaan, dan cara menulis teks narasi yang baik.', 1, 1, 30, 50),
-(2, 'Teks Argumentasi', 'Mempelajari cara menyusun argumen yang logis dan persuasif.', 2, 2, 45, 80),
-(2, 'Karya Sastra', 'Menganalisis unsur intrinsik dan ekstrinsik karya sastra Indonesia.', 3, 3, 60, 120);
+-- Soal Modul 1: Aljabar Dasar
+INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES
+(1, 'Jika 2x + 4 = 12, maka nilai x adalah...', '3', '4', '6', '8', 'b'),
+(1, 'Hasil dari (3x + 2)(x - 1) adalah...', '3x² - x - 2', '3x² + x - 2', '3x² - x + 2', '3x² - 5x - 2', 'a'),
+(1, 'Himpunan penyelesaian dari 2x - 3 > 7 adalah...', 'x > 5', 'x > 2', 'x < 5', 'x > 4', 'a'),
+(1, 'Nilai x yang memenuhi x² - 5x + 6 = 0 adalah...', 'x = 2 atau x = 3', 'x = -2 atau x = -3', 'x = 1 atau x = 6', 'x = -1 atau x = -6', 'a'),
+(1, 'Bentuk sederhana dari (4x² - 9) / (2x - 3) adalah...', '2x - 3', '2x + 3', '4x + 3', '4x - 3', 'b'),
+(1, 'Jika 3x - 7 = 2x + 5, maka x = ...', '10', '11', '12', '13', 'c'),
+(1, 'Faktor dari x² - 9 adalah...', '(x-3)(x-3)', '(x+3)(x+3)', '(x-3)(x+3)', '(x-9)(x+1)', 'c'),
+(1, 'Nilai dari 2³ × 2² adalah...', '2⁴', '2⁵', '2⁶', '4⁵', 'b');
 
--- Modul Bahasa Inggris
-INSERT INTO modul (mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(3, 'Simple Present & Past', 'Memahami penggunaan simple present dan past tense dalam komunikasi sehari-hari.', 1, 1, 30, 50),
-(3, 'Reading Comprehension', 'Melatih kemampuan memahami teks bahasa Inggris dan menjawab pertanyaan.', 2, 2, 45, 80),
-(3, 'Writing Skills', 'Mempelajari cara menulis paragraf, essay, dan surat resmi dalam bahasa Inggris.', 3, 3, 60, 120);
+-- Soal Modul 2: Persamaan Kuadrat
+INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES
+(2, 'Akar-akar dari x² - 5x + 6 = 0 adalah...', 'x=1 dan x=6', 'x=2 dan x=3', 'x=-2 dan x=-3', 'x=2 dan x=-3', 'b'),
+(2, 'Diskriminan dari x² - 4x + 4 = 0 adalah...', '-4', '0', '4', '8', 'b'),
+(2, 'Jumlah akar-akar dari 2x² - 6x + 4 = 0 adalah...', '1', '2', '3', '4', 'c'),
+(2, 'Persamaan kuadrat yang akar-akarnya 2 dan -3 adalah...', 'x²+x-6=0', 'x²-x-6=0', 'x²+x+6=0', 'x²-x+6=0', 'a'),
+(2, 'Hasil kali akar-akar dari 3x² - 9x + 6 = 0 adalah...', '1', '2', '3', '6', 'b'),
+(2, 'Nilai x dari (x-2)² = 9 adalah...', 'x=5 atau x=-1', 'x=5 atau x=1', 'x=3 atau x=-3', 'x=11 atau x=-7', 'a'),
+(2, 'Persamaan x² + bx + 9 = 0 memiliki akar kembar jika b = ...', '3', '6', '9', '18', 'b'),
+(2, 'Melengkapi kuadrat dari x² + 6x = 7 menghasilkan...', '(x+3)²=16', '(x+3)²=10', '(x+6)²=43', '(x+3)²=7', 'a');
 
--- Soal Matematika - Aljabar
-INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar, bobot_poin) VALUES
-(1, 'Jika 2x + 4 = 12, maka nilai x adalah...', '3', '4', '6', '8', 'b', 1),
-(1, 'Hasil dari (3x + 2)(x - 1) adalah...', '3x² - x - 2', '3x² + x - 2', '3x² - x + 2', '3x² - 5x - 2', 'a', 1),
-(1, 'Himpunan penyelesaian dari 2x - 3 > 7 adalah...', 'x > 5', 'x > 2', 'x < 5', 'x > 4', 'a', 1),
-(1, 'Nilai dari x² - 5x + 6 = 0 adalah...', 'x = 2 atau x = 3', 'x = -2 atau x = -3', 'x = 1 atau x = 6', 'x = -1 atau x = -6', 'a', 1),
-(1, 'Bentuk sederhana dari (4x² - 9) / (2x - 3) adalah...', '2x - 3', '2x + 3', '4x + 3', '4x - 3', 'b', 1);
+-- Soal Modul 5: Trigonometri Dasar
+INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES
+(5, 'Nilai dari sin 30° adalah...', '√3/2', '1/2', '√2/2', '1', 'b'),
+(5, 'Nilai cos 60° adalah...', '√3/2', '√2/2', '1/2', '0', 'c'),
+(5, 'tan 45° sama dengan...', '0', '√3', '1/√3', '1', 'd'),
+(5, 'Identitas trigonometri sin²θ + cos²θ = ...', '0', '1', '2', 'tan²θ', 'b'),
+(5, 'Nilai dari sin 90° adalah...', '0', '1/2', '√2/2', '1', 'd'),
+(5, 'Nilai cos 0° adalah...', '0', '1/2', '√3/2', '1', 'd'),
+(5, 'Jika sin θ = 3/5, maka cos θ = ...', '4/5', '3/4', '5/3', '5/4', 'a'),
+(5, 'tan θ dapat dinyatakan sebagai...', 'sin θ × cos θ', 'sin θ / cos θ', 'cos θ / sin θ', '1 / sin θ', 'b');
 
--- Soal Matematika - Trigonometri
-INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar, bobot_poin) VALUES
-(3, 'Identitas trigonometri sin²θ + cos²θ = ...', '0', '1', '2', 'tan²θ', 'b', 1),
-(3, 'Nilai dari sin 30° adalah...', '√3/2', '1/2', '√2/2', '1', 'b', 1),
-(3, 'Nilai cos 60° adalah...', '√3/2', '√2/2', '1/2', '0', 'c', 1),
-(3, 'tan 45° sama dengan...', '0', '√3', '1/√3', '1', 'd', 1),
-(3, 'Nilai dari sin 90° adalah...', '0', '1/2', '√2/2', '1', 'd', 1);
+-- Soal Modul 7: Statistika Dasar
+INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES
+(7, 'Data: 5, 7, 8, 9, 11. Rata-rata (mean) dari data tersebut adalah...', '7', '8', '9', '10', 'b'),
+(7, 'Data: 3, 5, 7, 9, 11. Median dari data tersebut adalah...', '5', '7', '9', '11', 'b'),
+(7, 'Data: 2, 4, 4, 5, 7, 4. Modus dari data tersebut adalah...', '2', '4', '5', '7', 'b'),
+(7, 'Jangkauan (range) dari data 3, 7, 2, 9, 5 adalah...', '5', '6', '7', '8', 'c'),
+(7, 'Simpangan baku merupakan akar dari...', 'mean', 'median', 'varians', 'modus', 'c'),
+(7, 'Data nilai ulangan: 60, 70, 80, 90, 100. Nilai rata-ratanya adalah...', '70', '80', '85', '90', 'b'),
+(7, 'Histogram digunakan untuk menyajikan data...', 'kategori', 'bergolong', 'nominal', 'ordinal', 'b'),
+(7, 'Kuartil bawah (Q1) adalah nilai yang membagi...', '25% data terbawah', '50% data', '75% data', '100% data', 'a');
 
--- Soal Bahasa Inggris - Simple Present
-INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar, bobot_poin) VALUES
-(8, 'She ___ to school every day.', 'go', 'goes', 'going', 'gone', 'b', 1),
-(8, 'They ___ not like spicy food.', 'does', 'do', 'did', 'done', 'b', 1),
-(8, 'Yesterday, he ___ his homework.', 'finish', 'finishes', 'finished', 'finishing', 'c', 1),
-(8, '___ you go to the market last week?', 'Do', 'Does', 'Did', 'Will', 'c', 1),
-(8, 'The correct simple present sentence is...', 'She go to school', 'She goes to school', 'She going to school', 'She gone to school', 'b', 1);
-
--- Assessment
+-- Assessment (ujian untuk modul-modul utama)
 INSERT INTO assessment (modul_id, judul, durasi_menit, max_retake, nilai_lulus, deadline) VALUES
-(1, 'Ujian Aljabar Dasar', 20, 3, 60, DATE_ADD(NOW(), INTERVAL 30 DAY)),
-(3, 'Ujian Trigonometri', 30, 3, 60, DATE_ADD(NOW(), INTERVAL 30 DAY)),
-(8, 'Ujian Simple Present & Past', 20, 3, 60, DATE_ADD(NOW(), INTERVAL 30 DAY));
+(1,  'Ujian Aljabar Dasar',      20, 3, 60, DATE_ADD(NOW(), INTERVAL 60 DAY)),
+(2,  'Ujian Persamaan Kuadrat',  25, 3, 60, DATE_ADD(NOW(), INTERVAL 60 DAY)),
+(5,  'Ujian Trigonometri Dasar', 30, 3, 60, DATE_ADD(NOW(), INTERVAL 60 DAY)),
+(7,  'Ujian Statistika Dasar',   25, 3, 60, DATE_ADD(NOW(), INTERVAL 60 DAY));
 
--- Users (password = "password123" semua)
+-- Users (password = "password123" semua, hash akan di-update)
 INSERT INTO users (nama, email, password, role, sekolah_id) VALUES
-('Justin Bryan', 'siswa1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 1),
-('Budi Santoso', 'siswa2@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 2),
-('Citra Dewi', 'siswa3@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 3),
-('Dian Rahayu', 'siswa4@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 4),
-('Eka Putri', 'siswa5@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 5),
-('Pak Guru', 'guru1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'guru', 1);
+('Justin Bryan',  'siswa1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 1),
+('Budi Santoso',  'siswa2@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 2),
+('Citra Dewi',    'siswa3@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 3),
+('Dian Rahayu',   'siswa4@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 4),
+('Eka Putri',     'siswa5@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 5),
+('Pak Guru',      'guru1@test.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'guru',  1);
 
--- Modul Progress awal (modul pertama tersedia untuk semua siswa)
+-- Modul Progress awal (modul 1 tersedia untuk semua siswa)
 INSERT INTO modul_progress (user_id, modul_id, status) VALUES
-(1, 1, 'tersedia'), (1, 5, 'tersedia'), (1, 8, 'tersedia'),
-(2, 1, 'tersedia'), (2, 5, 'tersedia'), (2, 8, 'tersedia'),
-(3, 1, 'tersedia'), (3, 5, 'tersedia'), (3, 8, 'tersedia'),
-(4, 1, 'tersedia'), (4, 5, 'tersedia'), (4, 8, 'tersedia'),
-(5, 1, 'tersedia'), (5, 5, 'tersedia'), (5, 8, 'tersedia');
+(1, 1, 'tersedia'),
+(2, 1, 'tersedia'),
+(3, 1, 'tersedia'),
+(4, 1, 'tersedia'),
+(5, 1, 'tersedia');
 
 -- Sample Poin Log (untuk demo leaderboard)
 INSERT INTO poin_log (user_id, jumlah, tipe, keterangan) VALUES
-(1, 85, 'assessment', 'Ujian Aljabar Dasar'),
-(1, 120, 'assessment', 'Ujian Trigonometri'),
-(1, 50, 'modul', 'Selesai modul Aljabar Dasar'),
+(1,  85, 'assessment', 'Ujian Aljabar Dasar'),
+(1,  90, 'assessment', 'Ujian Persamaan Kuadrat'),
+(1,  50, 'modul',      'Selesai modul Aljabar Dasar'),
 (2, 200, 'assessment', 'Ujian Aljabar Dasar'),
-(2, 150, 'assessment', 'Ujian Simple Present'),
-(3, 300, 'assessment', 'Ujian Trigonometri'),
-(3, 80, 'modul', 'Selesai modul Trigonometri'),
-(4, 75, 'assessment', 'Ujian Simple Present'),
-(5, 95, 'assessment', 'Ujian Aljabar Dasar');
+(2, 150, 'assessment', 'Ujian Trigonometri Dasar'),
+(3, 300, 'assessment', 'Ujian Trigonometri Dasar'),
+(3,  80, 'modul',      'Selesai modul Trigonometri Dasar'),
+(4,  75, 'assessment', 'Ujian Statistika Dasar'),
+(5,  95, 'assessment', 'Ujian Aljabar Dasar'),
+(5,  60, 'modul',      'Selesai modul Aljabar Dasar');
