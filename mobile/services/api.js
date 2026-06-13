@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 
 // Ganti IP sesuai IP laptop kamu (cek: ipconfig di Windows / ifconfig di Mac)
-const BASE_URL = 'http://192.168.0.101:3000';
+const BASE_URL = 'https://edurank-production.up.railway.app';
 
 const api = axios.create({
   baseURL: BASE_URL,
