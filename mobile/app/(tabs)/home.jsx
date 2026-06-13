@@ -86,9 +86,9 @@ export default function DashboardScreen() {
             <Text style={styles.userName}>{user?.nama?.split(' ')[0] || 'User'} 👋</Text>
             <Text style={styles.sekolah}>{user?.nama_sekolah || 'EduRank'}</Text>
           </View>
-          <View style={styles.avatar}>
+          <TouchableOpacity style={styles.avatar} onPress={() => router.push('/(tabs)/profil')} activeOpacity={0.8}>
             <Text style={styles.avatarText}>{getInitials(user?.nama)}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {isSiswa ? (
