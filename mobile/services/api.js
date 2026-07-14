@@ -1,9 +1,20 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 
-// Ganti IP sesuai IP laptop kamu (cek: ipconfig di Windows / ifconfig di Mac)
 const BASE_URL = 'https://edurank-production.up.railway.app';
+
+const storage = {
+  async getItem(key) {
+    if (Platform.OS === 'web') return localStorage.getItem(key);
+    return await SecureStore.getItemAsync(key);
+  },
+  async deleteItem(key) {
+    if (Platform.OS === 'web') { localStorage.removeItem(key); return; }
+    await SecureStore.deleteItemAsync(key);
+  },
+};
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -12,7 +23,7 @@ const api = axios.create({
 
 // Request interceptor: attach token
 api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('token');
+  const token = await storage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,9 +36,8 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
-      // Jangan redirect jika sedang validasi token awal
       if (!url.includes('/api/auth/me') && !url.includes('/api/auth/login')) {
-        await SecureStore.deleteItemAsync('token');
+        await storage.deleteItem('token');
         router.replace('/login');
       }
     }
