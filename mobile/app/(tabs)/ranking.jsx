@@ -71,7 +71,7 @@ export default function RankingScreen() {
     }
   };
 
-  const isGuruAdvisor = ['guru', 'advisor'].includes(user?.role);
+  const isGuruAdvisor = false;
 
   const maxWilayah = Math.max(...(data.wilayah.map(w => w.rata_poin) || [1]));
 

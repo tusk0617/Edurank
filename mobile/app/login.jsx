@@ -92,8 +92,7 @@ export default function LoginScreen() {
 
           <View style={styles.demoBox}>
             <Text style={styles.demoTitle}>Akun Demo:</Text>
-            <Text style={styles.demoText}>Siswa: siswa1@test.com</Text>
-            <Text style={styles.demoText}>Guru: guru1@test.com</Text>
+            <Text style={styles.demoText}>Email: siswa1@test.com</Text>
             <Text style={styles.demoText}>Password: password123</Text>
           </View>
         </View>
