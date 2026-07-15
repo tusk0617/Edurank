@@ -70,6 +70,8 @@ export default function DashboardScreen() {
     );
   }
 
+  const isGuruAdvisor = ['guru', 'advisor'].includes(user?.role);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -89,80 +91,105 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Poin & Rank */}
-        <View style={styles.statsRow}>
-          <Card style={styles.statCard}>
-            <Ionicons name="star" size={20} color={Colors.warning} />
-            <Text style={styles.statValue}>{data?.progress?.total_xp || 0}</Text>
-            <Text style={styles.statLabel}>Total XP</Text>
-          </Card>
-          <Card style={styles.statCard}>
-            <Ionicons name="trophy" size={20} color={Colors.primary} />
-            <Text style={styles.statValue}>#{data?.rank?.rank || '-'}</Text>
-            <Text style={styles.statLabel}>Peringkat</Text>
-          </Card>
-          <Card style={styles.statCard}>
-            <Ionicons name="checkmark-circle" size={20} color={Colors.secondary} />
-            <Text style={styles.statValue}>{data?.progress?.modul_selesai || 0}</Text>
-            <Text style={styles.statLabel}>Modul Selesai</Text>
-          </Card>
-        </View>
-
-        {/* Modul Aktif */}
-        {data?.modulAktif && (
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>📚 Modul Aktif</Text>
-            <View style={styles.modulAktif}>
-              <View style={[styles.modulDot, { backgroundColor: data.modulAktif.warna_hex }]} />
-              <View style={styles.modulInfo}>
-                <Text style={styles.modulJudul}>{data.modulAktif.judul}</Text>
-                <Text style={styles.modulMapel}>{data.modulAktif.nama_mapel}</Text>
-                <ProgressBar value={data.modulAktif.persen_selesai} color={data.modulAktif.warna_hex} showLabel height={6} />
-              </View>
+        {isGuruAdvisor ? (
+          <>
+            {/* Dashboard Guru/Advisor */}
+            <View style={styles.statsRow}>
+              <Card style={styles.statCard}>
+                <Ionicons name="people" size={20} color={Colors.primary} />
+                <Text style={styles.statValue}>5</Text>
+                <Text style={styles.statLabel}>Siswa Aktif</Text>
+              </Card>
+              <Card style={styles.statCard}>
+                <Ionicons name="bar-chart" size={20} color={Colors.secondary} />
+                <Text style={styles.statValue}>74.2</Text>
+                <Text style={styles.statLabel}>Rata Nilai</Text>
+              </Card>
             </View>
-            <TouchableOpacity style={styles.lanjutBtn} onPress={() => router.push('/(tabs)/modul')}>
-              <Text style={styles.lanjutText}>Lanjutkan Belajar →</Text>
-            </TouchableOpacity>
-          </Card>
-        )}
+            <Card style={styles.section}>
+              <Text style={styles.sectionTitle}>🔍 Analisis Gap</Text>
+              <Text style={styles.gapDesc}>Lihat perbandingan performa antar sekolah dan identifikasi siswa berisiko.</Text>
+              <TouchableOpacity style={styles.gapBtn} onPress={() => router.push('/(tabs)/ranking')}>
+                <Ionicons name="analytics" size={18} color="#fff" />
+                <Text style={styles.gapBtnText}>Buka Gap Analysis</Text>
+              </TouchableOpacity>
+            </Card>
+          </>
+        ) : (
+          <>
+            {/* Dashboard Siswa */}
+            <View style={styles.statsRow}>
+              <Card style={styles.statCard}>
+                <Ionicons name="star" size={20} color={Colors.warning} />
+                <Text style={styles.statValue}>{data?.progress?.total_xp || 0}</Text>
+                <Text style={styles.statLabel}>Total XP</Text>
+              </Card>
+              <Card style={styles.statCard}>
+                <Ionicons name="trophy" size={20} color={Colors.primary} />
+                <Text style={styles.statValue}>#{data?.rank?.rank || '-'}</Text>
+                <Text style={styles.statLabel}>Peringkat</Text>
+              </Card>
+              <Card style={styles.statCard}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.secondary} />
+                <Text style={styles.statValue}>{data?.progress?.modul_selesai || 0}</Text>
+                <Text style={styles.statLabel}>Modul Selesai</Text>
+              </Card>
+            </View>
 
-        {/* Assessment Mendatang */}
-        {data?.assessmentMendatang?.length > 0 && (
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>📝 Ujian Mendatang</Text>
-            {data.assessmentMendatang.map(a => {
-              const deadline = new Date(a.deadline);
-              const isClose = (deadline - new Date()) < 24 * 60 * 60 * 1000;
-              return (
-                <TouchableOpacity key={a.id} style={styles.assessItem} onPress={() => router.push('/(tabs)/assessment')}>
-                  <View style={[styles.mapelDot, { backgroundColor: a.warna_hex }]} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.assessJudul}>{a.judul}</Text>
-                    <Text style={[styles.assessDeadline, isClose && { color: Colors.danger }]}>
-                      {isClose ? '⏰ ' : '📅 '}
-                      {deadline.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                    </Text>
+            {data?.modulAktif && (
+              <Card style={styles.section}>
+                <Text style={styles.sectionTitle}>📚 Modul Aktif</Text>
+                <View style={styles.modulAktif}>
+                  <View style={[styles.modulDot, { backgroundColor: data.modulAktif.warna_hex }]} />
+                  <View style={styles.modulInfo}>
+                    <Text style={styles.modulJudul}>{data.modulAktif.judul}</Text>
+                    <Text style={styles.modulMapel}>{data.modulAktif.nama_mapel}</Text>
+                    <ProgressBar value={data.modulAktif.persen_selesai} color={data.modulAktif.warna_hex} showLabel height={6} />
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={Colors.muted} />
-                </TouchableOpacity>
-              );
-            })}
-          </Card>
-        )}
-
-        {/* Badge */}
-        {data?.progress?.badges?.length > 0 && (
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>🏅 Badge Diraih</Text>
-            <View style={styles.badgeRow}>
-              {data.progress.badges.slice(0, 4).map(b => (
-                <View key={b.id} style={[styles.badgeItem, { backgroundColor: b.warna_hex + '20' }]}>
-                  <Ionicons name={b.ikon_nama} size={22} color={b.warna_hex} />
-                  <Text style={[styles.badgeName, { color: b.warna_hex }]}>{b.nama}</Text>
                 </View>
-              ))}
-            </View>
-          </Card>
+                <TouchableOpacity style={styles.lanjutBtn} onPress={() => router.push('/(tabs)/modul')}>
+                  <Text style={styles.lanjutText}>Lanjutkan Belajar →</Text>
+                </TouchableOpacity>
+              </Card>
+            )}
+
+            {data?.assessmentMendatang?.length > 0 && (
+              <Card style={styles.section}>
+                <Text style={styles.sectionTitle}>📝 Ujian Mendatang</Text>
+                {data.assessmentMendatang.map(a => {
+                  const deadline = new Date(a.deadline);
+                  const isClose = (deadline - new Date()) < 24 * 60 * 60 * 1000;
+                  return (
+                    <TouchableOpacity key={a.id} style={styles.assessItem} onPress={() => router.push('/(tabs)/assessment')}>
+                      <View style={[styles.mapelDot, { backgroundColor: a.warna_hex }]} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.assessJudul}>{a.judul}</Text>
+                        <Text style={[styles.assessDeadline, isClose && { color: Colors.danger }]}>
+                          {isClose ? '⏰ ' : '📅 '}
+                          {deadline.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={Colors.muted} />
+                    </TouchableOpacity>
+                  );
+                })}
+              </Card>
+            )}
+
+            {data?.progress?.badges?.length > 0 && (
+              <Card style={styles.section}>
+                <Text style={styles.sectionTitle}>🏅 Badge Diraih</Text>
+                <View style={styles.badgeRow}>
+                  {data.progress.badges.slice(0, 4).map(b => (
+                    <View key={b.id} style={[styles.badgeItem, { backgroundColor: b.warna_hex + '20' }]}>
+                      <Ionicons name={b.ikon_nama} size={22} color={b.warna_hex} />
+                      <Text style={[styles.badgeName, { color: b.warna_hex }]}>{b.nama}</Text>
+                    </View>
+                  ))}
+                </View>
+              </Card>
+            )}
+          </>
         )}
 
         <View style={{ height: 20 }} />

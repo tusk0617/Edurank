@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 
-const BASE_URL = 'https://edurank-production.up.railway.app';
+const BASE_URL = 'https://app-7b28b5c9-226a-4f4b-a64e-4cc73da21c44.cleverapps.io';
 
 const storage = {
   async getItem(key) {
