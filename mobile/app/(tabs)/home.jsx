@@ -20,6 +20,11 @@ export default function DashboardScreen() {
 
   const fetchData = useCallback(async () => {
     try {
+      const isGuruAdvisorRole = ['guru', 'advisor'].includes(user?.role);
+      if (isGuruAdvisorRole) {
+        setData({});
+        return;
+      }
       const [progressRes, rankRes, assessmentRes, modulRes] = await Promise.all([
         getProgressSaya(),
         getRankingSaya(),
@@ -44,7 +49,7 @@ export default function DashboardScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [user?.role]);
 
   useEffect(() => { fetchData(); }, []);
 
