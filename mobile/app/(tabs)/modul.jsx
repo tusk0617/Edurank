@@ -27,7 +27,7 @@ export default function ModulScreen() {
   const [badgeModal, setBadgeModal] = useState(null);
 
   // Toast
-  const toastAnim = useRef(new Animated.Value(-80)).current;
+  const toastAnim = useRef(new Animated.Value(-200)).current;
   const [toastMsg, setToastMsg] = useState('');
 
   // Modal progress animation
