@@ -36,7 +36,7 @@ export async function scheduleDeadlineNotifications(assessments) {
           body: `${a.judul} deadline besok. Jangan lupa kerjakan!`,
           data: { assessmentId: a.id },
         },
-        trigger: h1,
+        trigger: { type: 'date', date: h1 },
       });
     }
 
@@ -49,7 +49,7 @@ export async function scheduleDeadlineNotifications(assessments) {
           body: `${a.judul} akan berakhir dalam 3 jam. Segera kerjakan!`,
           data: { assessmentId: a.id },
         },
-        trigger: h3jam,
+        trigger: { type: 'date', date: h3jam },
       });
     }
   }
