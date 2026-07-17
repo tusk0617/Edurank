@@ -42,11 +42,11 @@ export default function LoginScreen() {
         {/* Logo */}
         <View style={styles.logoSection}>
           <View style={styles.logoCircle}>
-            <Text style={styles.logoIcon}>🏆</Text>
+            <Text style={styles.logoIcon}>📐</Text>
           </View>
-          <Text style={styles.logoText}>EduRank</Text>
-          <Text style={styles.subtitle}>Platform Kompetisi Akademik</Text>
-          <Text style={styles.tagline}>Antar Sekolah Se-Jakarta</Text>
+          <Text style={styles.logoText}>FrontSchooler</Text>
+          <Text style={styles.subtitle}>Platform Pembelajaran Matematika</Text>
+          <Text style={styles.tagline}>Garda Depan Pelajar Indonesia</Text>
         </View>
 
         {/* Form */}
