@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getProgressSaya, getRankingSaya, getAssessment, getModul } from '../../services/api';
@@ -51,7 +51,7 @@ export default function DashboardScreen() {
     }
   }, [user?.role]);
 
-  useEffect(() => { fetchData(); }, []);
+  useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 

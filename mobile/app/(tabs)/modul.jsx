@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   ActivityIndicator, RefreshControl, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { getModul, getProgressSaya } from '../../services/api';
 import Card from '../../components/ui/Card';
 import ProgressBar from '../../components/ui/ProgressBar';
@@ -48,7 +48,7 @@ export default function ModulScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
 
   const handlePress = (m) => {
     if (m.status_progress === 'terkunci') {

@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getAssessment } from '../../services/api';
 import { scheduleDeadlineNotifications } from '../../services/notifications';
@@ -36,7 +36,7 @@ export default function AssessmentScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
 
   const getDeadlineInfo = (deadline) => {
     if (!deadline) return null;

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   ActivityIndicator, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getModulById, mulaiModul, selesaiModul } from '../../services/api';
 import Colors from '../../constants/Colors';
@@ -62,12 +62,15 @@ export default function ModulDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
+  const loadModul = useCallback(() => {
+    setLoading(true);
     getModulById(id)
       .then(res => setModul(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useFocusEffect(loadModul);
 
   const handleMulai = async () => {
     setActionLoading(true);
@@ -192,14 +195,9 @@ export default function ModulDetailScreen() {
           </TouchableOpacity>
         )}
         {isSedang && (
-          <View style={styles.btnRow}>
-            <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={handleMulai} disabled={actionLoading}>
-              <Text style={[styles.btnText, { color: modul.warna_hex }]}>▶ Lanjutkan</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.btn, { backgroundColor: Colors.secondary, flex: 1 }]} onPress={handleSelesai} disabled={actionLoading}>
-              {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>✓ Tandai Selesai</Text>}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={[styles.btn, { backgroundColor: Colors.secondary }]} onPress={handleSelesai} disabled={actionLoading}>
+            {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>✓ Tandai Selesai</Text>}
+          </TouchableOpacity>
         )}
         {isSelesai && (
           <View style={[styles.btn, { backgroundColor: Colors.secondary + '20' }]}>

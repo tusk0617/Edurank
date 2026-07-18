@@ -62,7 +62,7 @@ router.get('/:id', verifyToken, async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT m.*, mp.nama AS nama_mapel, mp.warna_hex,
-              COALESCE(p.status, 'terkunci') AS status_progress,
+              COALESCE(p.status, IF(m.urutan = 1, 'tersedia', 'terkunci')) AS status_progress,
               COALESCE(p.persen_selesai, 0) AS persen_selesai,
               p.mulai_at, p.selesai_at
        FROM modul m
