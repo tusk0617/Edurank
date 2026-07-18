@@ -73,7 +73,7 @@ export default function AssessmentScreen() {
       >
         {assessments.map(a => {
           const info = getDeadlineInfo(a.deadline);
-          const cfg = STATUS_CONFIG[a.status_terakhir || 'null'];
+          const cfg = STATUS_CONFIG[a.status_terakhir] ?? STATUS_CONFIG['null'];
           const sisaPercobaan = a.max_retake - (a.jumlah_percobaan || 0);
           const bisa = canStart(a);
 

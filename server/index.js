@@ -21,7 +21,7 @@ app.use('/api/ranking', require('./routes/ranking'));
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`EduRank server running on port ${PORT}`);
 });

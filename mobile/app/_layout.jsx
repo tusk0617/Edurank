@@ -15,6 +15,7 @@ export default function RootLayout() {
           <Stack.Screen name="login" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="assessment/[id]" />
+          <Stack.Screen name="modul/[id]" />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>
