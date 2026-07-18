@@ -6,14 +6,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  getRankingIndividu, getRankingSekolah, getRankingWilayah,
+  getRankingIndividu, getRankingWilayah,
   getRankingSaya, getGapAnalisis,
 } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Colors from '../../constants/Colors';
 
-const TABS = ['Individu', 'Sekolah', 'Wilayah'];
+const TABS = ['Individu', 'Wilayah'];
 const PERIODE = ['Minggu', 'Bulan', 'Semua'];
 const WILAYAH_LIST = ['Jakarta Selatan', 'Jakarta Utara', 'Jakarta Pusat', 'Jakarta Barat', 'Jakarta Timur'];
 
@@ -29,7 +29,7 @@ export default function RankingScreen() {
   const { user } = useAuth();
   const [tab, setTab] = useState(0);
   const [periode, setPeriode] = useState(2);
-  const [data, setData] = useState({ individu: [], sekolah: [], wilayah: [] });
+  const [data, setData] = useState({ individu: [], wilayah: [] });
   const [myRank, setMyRank] = useState(null);
   const [gapData, setGapData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,13 +40,12 @@ export default function RankingScreen() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [indRes, sklRes, wilRes, myRes] = await Promise.all([
+      const [indRes, wilRes, myRes] = await Promise.all([
         getRankingIndividu(periodeKey),
-        getRankingSekolah(periodeKey),
         getRankingWilayah(),
         getRankingSaya(),
       ]);
-      setData({ individu: indRes.data, sekolah: sklRes.data, wilayah: wilRes.data });
+      setData({ individu: indRes.data, wilayah: wilRes.data });
       setMyRank(myRes.data);
     } catch (err) {
       console.error(err);
@@ -108,9 +107,9 @@ export default function RankingScreen() {
         {isGuruAdvisor && (
           <TouchableOpacity
             style={[styles.tab, styles.gapTab]}
-            onPress={() => { setTab(3); fetchGap(); }}
+            onPress={() => { setTab(2); fetchGap(); }}
           >
-            <Text style={[styles.tabText, tab === 3 && styles.tabTextActive]}>Gap</Text>
+            <Text style={[styles.tabText, tab === 2 && styles.tabTextActive]}>Gap</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -147,7 +146,6 @@ export default function RankingScreen() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.rankName}>{u.nama}</Text>
-                      <Text style={styles.rankSekolah}>{u.sekolah}</Text>
                     </View>
                     <Text style={styles.rankPoin}>{u.total_poin}</Text>
                   </View>
@@ -164,29 +162,8 @@ export default function RankingScreen() {
             </View>
           )}
 
-          {/* Tab: Sekolah */}
-          {tab === 1 && (
-            <View style={styles.listContainer}>
-              {data.sekolah.map((s, idx) => (
-                <Card key={s.sekolah_id} style={styles.sekolahCard}>
-                  <View style={styles.sekolahRank}>
-                    <Text style={styles.sekolahRankNum}>#{idx + 1}</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.sekolahNama}>{s.nama_sekolah}</Text>
-                    <Text style={styles.sekolahWilayah}>{s.wilayah}</Text>
-                    <View style={styles.sekolahMeta}>
-                      <Text style={styles.metaChip}>👤 {s.jumlah_siswa} siswa</Text>
-                      <Text style={styles.metaChip}>⭐ {parseFloat(s.rata_poin).toFixed(0)} rata poin</Text>
-                    </View>
-                  </View>
-                </Card>
-              ))}
-            </View>
-          )}
-
           {/* Tab: Wilayah */}
-          {tab === 2 && (
+          {tab === 1 && (
             <View style={styles.listContainer}>
               <Text style={styles.sectionTitle}>Rata Poin per Wilayah</Text>
               {WILAYAH_LIST.map(wil => {
@@ -206,7 +183,7 @@ export default function RankingScreen() {
           )}
 
           {/* Tab: Gap Analysis */}
-          {tab === 3 && isGuruAdvisor && (
+          {tab === 2 && isGuruAdvisor && (
             gapLoading ? (
               <View style={styles.centered}><ActivityIndicator size="large" color={Colors.primary} /></View>
             ) : gapData ? (
@@ -381,17 +358,9 @@ const styles = StyleSheet.create({
   miniAvatar: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   miniAvatarText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   rankName: { fontSize: 14, fontWeight: '600', color: Colors.text },
-  rankSekolah: { fontSize: 11, color: Colors.muted },
   rankPoin: { fontSize: 14, fontWeight: '700', color: Colors.primary },
   myRankSticky: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.lightBlue, margin: 16, padding: 12, borderRadius: 10 },
   myRankText: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
-  sekolahCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  sekolahRank: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.primary + '20', justifyContent: 'center', alignItems: 'center' },
-  sekolahRankNum: { fontSize: 14, fontWeight: '700', color: Colors.primary },
-  sekolahNama: { fontSize: 14, fontWeight: '700', color: Colors.text },
-  sekolahWilayah: { fontSize: 12, color: Colors.muted },
-  sekolahMeta: { flexDirection: 'row', gap: 8, marginTop: 4 },
-  metaChip: { fontSize: 11, color: Colors.muted },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.text, marginBottom: 10 },
   wilayahRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   wilayahLabel: { fontSize: 11, color: Colors.text, width: 70 },

@@ -64,7 +64,6 @@ export const submitAssessment = (id, data) => api.post(`/api/assessment/${id}/su
 
 // Ranking
 export const getRankingIndividu = (periode = 'semua') => api.get(`/api/ranking/individu?periode=${periode}`);
-export const getRankingSekolah = (periode = 'semua') => api.get(`/api/ranking/sekolah?periode=${periode}`);
 export const getRankingWilayah = () => api.get('/api/ranking/wilayah');
 export const getRankingSaya = () => api.get('/api/ranking/saya');
 export const getGapAnalisis = () => api.get('/api/ranking/gap/analisis');

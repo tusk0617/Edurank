@@ -16,45 +16,15 @@ router.get('/individu', verifyToken, async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT u.id AS user_id, u.nama, s.nama_sekolah AS sekolah, s.wilayah,
+      `SELECT u.id AS user_id, u.nama,
               COALESCE(SUM(pl.jumlah), 0) AS total_poin,
               RANK() OVER (ORDER BY COALESCE(SUM(pl.jumlah), 0) DESC) AS \`rank\`
        FROM users u
-       LEFT JOIN sekolah s ON u.sekolah_id = s.id
        LEFT JOIN poin_log pl ON pl.user_id = u.id ${periodFilter}
        WHERE u.role = 'siswa'
-       GROUP BY u.id, u.nama, s.nama_sekolah, s.wilayah
+       GROUP BY u.id, u.nama
        ORDER BY total_poin DESC
        LIMIT 50`
-    );
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// GET /api/ranking/sekolah
-router.get('/sekolah', verifyToken, async (req, res) => {
-  const periode = req.query.periode || 'semua';
-  const periodFilter = getPeriodFilter(periode);
-
-  try {
-    const [rows] = await pool.query(
-      `SELECT s.id AS sekolah_id, s.nama_sekolah, s.wilayah,
-              COALESCE(AVG(sub.total_poin), 0) AS rata_poin,
-              COUNT(DISTINCT sub.user_id) AS jumlah_siswa,
-              RANK() OVER (ORDER BY COALESCE(AVG(sub.total_poin), 0) DESC) AS \`rank\`
-       FROM sekolah s
-       LEFT JOIN (
-         SELECT u.id AS user_id, u.sekolah_id, COALESCE(SUM(pl.jumlah), 0) AS total_poin
-         FROM users u
-         LEFT JOIN poin_log pl ON pl.user_id = u.id ${periodFilter}
-         WHERE u.role = 'siswa'
-         GROUP BY u.id, u.sekolah_id
-       ) sub ON sub.sekolah_id = s.id
-       GROUP BY s.id, s.nama_sekolah, s.wilayah
-       ORDER BY rata_poin DESC`
     );
     res.json(rows);
   } catch (err) {
