@@ -65,25 +65,22 @@ export default function ModulDetailScreen() {
   const loadModul = useCallback(() => {
     setLoading(true);
     getModulById(id)
-      .then(res => setModul(res.data))
+      .then(async res => {
+        const data = res.data;
+        // Auto-mulai jika belum dimulai, tanpa perlu tombol
+        if (data.status_progress === 'tersedia') {
+          await mulaiModul(id).catch(() => {});
+          const refreshed = await getModulById(id).catch(() => ({ data }));
+          setModul(refreshed.data);
+        } else {
+          setModul(data);
+        }
+      })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, [id]);
 
   useFocusEffect(loadModul);
-
-  const handleMulai = async () => {
-    setActionLoading(true);
-    try {
-      await mulaiModul(id);
-      const res = await getModulById(id);
-      setModul(res.data);
-    } catch (err) {
-      Alert.alert('Error', err.response?.data?.message || 'Gagal memulai modul');
-    } finally {
-      setActionLoading(false);
-    }
-  };
 
   const handleSelesai = () => {
     Alert.alert('Konfirmasi', 'Tandai modul ini sebagai selesai?', [
@@ -189,14 +186,9 @@ export default function ModulDetailScreen() {
 
       {/* Action Button */}
       <View style={styles.footer}>
-        {isTersedia && (
-          <TouchableOpacity style={[styles.btnFull, { backgroundColor: modul.warna_hex }]} onPress={handleMulai} disabled={actionLoading}>
-            {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Mulai Modul</Text>}
-          </TouchableOpacity>
-        )}
-        {isSedang && (
+        {(isTersedia || isSedang) && (
           <View style={styles.btnRow}>
-            <TouchableOpacity style={[styles.btnHalf, styles.btnOutline]} onPress={handleMulai} disabled={actionLoading}>
+            <TouchableOpacity style={[styles.btnHalf, styles.btnOutline]} disabled>
               <Text style={[styles.btnText, { color: modul.warna_hex }]}>Lanjutkan</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.btnHalf, { backgroundColor: Colors.secondary }]} onPress={handleSelesai} disabled={actionLoading}>
