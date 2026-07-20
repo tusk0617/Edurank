@@ -190,18 +190,23 @@ export default function ModulDetailScreen() {
       {/* Action Button */}
       <View style={styles.footer}>
         {isTersedia && (
-          <TouchableOpacity style={[styles.btn, { backgroundColor: modul.warna_hex }]} onPress={handleMulai} disabled={actionLoading}>
-            {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>▶ Mulai Modul</Text>}
+          <TouchableOpacity style={[styles.btnFull, { backgroundColor: modul.warna_hex }]} onPress={handleMulai} disabled={actionLoading}>
+            {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Mulai Modul</Text>}
           </TouchableOpacity>
         )}
         {isSedang && (
-          <TouchableOpacity style={[styles.btn, { backgroundColor: Colors.secondary }]} onPress={handleSelesai} disabled={actionLoading}>
-            {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>✓ Tandai Selesai</Text>}
-          </TouchableOpacity>
+          <View style={styles.btnRow}>
+            <TouchableOpacity style={[styles.btnHalf, styles.btnOutline]} onPress={handleMulai} disabled={actionLoading}>
+              <Text style={[styles.btnText, { color: modul.warna_hex }]}>Lanjutkan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.btnHalf, { backgroundColor: Colors.secondary }]} onPress={handleSelesai} disabled={actionLoading}>
+              {actionLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Tandai Selesai</Text>}
+            </TouchableOpacity>
+          </View>
         )}
         {isSelesai && (
-          <View style={[styles.btn, { backgroundColor: Colors.secondary + '20' }]}>
-            <Text style={[styles.btnText, { color: Colors.secondary }]}>✓ Modul Selesai</Text>
+          <View style={[styles.btnFull, { backgroundColor: Colors.secondary + '20' }]}>
+            <Text style={[styles.btnText, { color: Colors.secondary }]}>Modul Selesai</Text>
           </View>
         )}
       </View>
@@ -237,7 +242,8 @@ const styles = StyleSheet.create({
   topikText: { flex: 1, fontSize: 14, color: Colors.text },
   footer: { padding: 16, paddingBottom: 24, backgroundColor: Colors.background, borderTopWidth: 0.5, borderTopColor: Colors.border },
   btnRow: { flexDirection: 'row', gap: 10 },
-  btn: { flex: 1, paddingVertical: 14, borderRadius: 10, alignItems: 'center' },
+  btnFull: { paddingVertical: 14, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  btnHalf: { flex: 1, paddingVertical: 14, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   btnOutline: { borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });
