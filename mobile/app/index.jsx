@@ -26,7 +26,7 @@ export default function Index() {
           <Text style={styles.logoIcon}>📐</Text>
         </View>
         <Text style={styles.appName}>FrontSchooler</Text>
-        <Text style={styles.tagline}>Garda Depan Pelajar Indonesia</Text>
+        <Text style={styles.tagline}>Platform Pendukung Akademis Siswa SMA</Text>
       </Animated.View>
       <Animated.Text style={[styles.version, { opacity: fadeAnim }]}>v1.0.0</Animated.Text>
     </View>

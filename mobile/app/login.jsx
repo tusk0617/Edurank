@@ -46,7 +46,7 @@ export default function LoginScreen() {
           </View>
           <Text style={styles.logoText}>FrontSchooler</Text>
           <Text style={styles.subtitle}>Platform Pembelajaran Matematika</Text>
-          <Text style={styles.tagline}>Garda Depan Pelajar Indonesia</Text>
+          <Text style={styles.tagline}>Platform Pendukung Akademis Siswa SMA</Text>
         </View>
 
         {/* Form */}
