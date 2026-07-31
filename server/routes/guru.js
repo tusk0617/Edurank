@@ -38,6 +38,8 @@ router.post('/modul', ...guruOnly, async (req, res) => {
   if (!judul || !mapel_id || !level) {
     return res.status(400).json({ message: 'Judul, kategori, dan tingkat kesulitan wajib diisi' });
   }
+  const levelMap = { 'Mudah': 1, 'Sedang': 2, 'Sulit': 3 };
+  const levelInt = levelMap[level] || 1;
   try {
     const [[{ urutan }]] = await pool.query(
       'SELECT COALESCE(MAX(urutan), 0) + 1 AS urutan FROM modul WHERE mapel_id = ?',
@@ -45,7 +47,7 @@ router.post('/modul', ...guruOnly, async (req, res) => {
     );
     const [result] = await pool.query(
       'INSERT INTO modul (mapel_id, judul, level, urutan) VALUES (?, ?, ?, ?)',
-      [mapel_id, judul.trim(), level, urutan]
+      [mapel_id, judul.trim(), levelInt, urutan]
     );
     res.status(201).json({ message: 'Materi berhasil ditambahkan', id: result.insertId });
   } catch (err) {
