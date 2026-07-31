@@ -18,7 +18,6 @@ app.use('/api/modul', require('./routes/modul'));
 app.use('/api/assessment', require('./routes/assessment'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/guru', require('./routes/guru'));
-app.use('/api/admin', require('./routes/admin'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));

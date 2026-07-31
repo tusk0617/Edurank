@@ -26,8 +26,6 @@ export default function LoginScreen() {
       const loggedUser = await login(email.trim(), password);
       if (loggedUser.role === 'guru') {
         router.replace('/(guru)/dashboard');
-      } else if (loggedUser.role === 'admin') {
-        router.replace('/(admin)/dashboard');
       } else {
         router.replace('/(tabs)/home');
       }

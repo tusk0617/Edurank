@@ -92,11 +92,5 @@ export const getGuruGapSiswa = () => api.get('/api/guru/gap/siswa');
 export const getGuruGapModul = () => api.get('/api/guru/gap/modul');
 export const getGuruGapModulSoal = (id) => api.get(`/api/guru/gap/modul/${id}`);
 
-// Admin
-export const getAdminUsers = () => api.get('/api/admin/users');
-export const getAdminStats = () => api.get('/api/admin/stats');
-export const createUser = (data) => api.post('/api/admin/users', data);
-export const resetUserPassword = (id, password) => api.put(`/api/admin/users/${id}/reset-password`, { password });
-export const deleteUser = (id) => api.delete(`/api/admin/users/${id}`);
 
 export default api;
