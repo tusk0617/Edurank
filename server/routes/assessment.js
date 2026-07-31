@@ -86,7 +86,10 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
     await conn.beginTransaction();
 
     // Get assessment & sesi info
-    const [[assessment]] = await conn.query('SELECT * FROM assessment WHERE id = ?', [assessmentId]);
+    const [[assessment]] = await conn.query(
+      'SELECT a.*, m.level AS modul_level FROM assessment a JOIN modul m ON a.modul_id = m.id WHERE a.id = ?',
+      [assessmentId]
+    );
     const [[sesi]] = await conn.query('SELECT * FROM hasil_assessment WHERE id = ? AND user_id = ?', [sesi_id, userId]);
 
     if (!sesi) {
@@ -144,7 +147,9 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
     const skorAkhir = Math.max(0, skor - potonganTerlambat - potonganRemedial);
     const lulus = skorAkhir >= 60;
     const statusHasil = lulus ? 'lulus' : (percobaan < assessment.max_retake ? 'remedial' : 'tidak_lulus');
-    const poinDidapat = Math.round(skorAkhir);
+    const levelXpMap = { 1: 50, 2: 100, 3: 150 };
+    const levelXp = levelXpMap[assessment.modul_level] || 50;
+    const poinDidapat = Math.round((skorAkhir / 100) * levelXp * 2);
 
     // Update sesi
     await conn.query(
