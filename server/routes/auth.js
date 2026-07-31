@@ -93,4 +93,27 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
+// PUT /api/auth/change-password
+router.put('/change-password', verifyToken, async (req, res) => {
+  const { password_lama, password_baru } = req.body;
+  if (!password_lama || !password_baru) {
+    return res.status(400).json({ message: 'Password lama dan baru wajib diisi' });
+  }
+  if (password_baru.length < 6) {
+    return res.status(400).json({ message: 'Password baru minimal 6 karakter' });
+  }
+  try {
+    const [[user]] = await pool.query('SELECT password FROM users WHERE id = ?', [req.user.id]);
+    if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
+    const isMatch = await bcrypt.compare(password_lama, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Password lama tidak sesuai' });
+    const hashed = await bcrypt.hash(password_baru, 10);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, req.user.id]);
+    res.json({ message: 'Password berhasil diubah' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

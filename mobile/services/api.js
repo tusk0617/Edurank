@@ -93,4 +93,7 @@ export const getGuruGapModul = () => api.get('/api/guru/gap/modul');
 export const getGuruGapModulSoal = (id) => api.get(`/api/guru/gap/modul/${id}`);
 
 
+// Auth actions
+export const changePassword = (data) => api.put('/api/auth/change-password', data);
+
 export default api;
