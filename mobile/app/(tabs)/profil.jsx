@@ -4,6 +4,7 @@ import {
   Alert, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getProgressSaya, getRankingSaya, getAssessment } from '../../services/api';
@@ -49,7 +50,10 @@ export default function ProfilScreen() {
   const handleLogout = () => {
     Alert.alert('Logout', 'Yakin ingin keluar?', [
       { text: 'Batal', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: logout },
+      {
+        text: 'Logout', style: 'destructive',
+        onPress: async () => { await logout(); router.replace('/login'); },
+      },
     ]);
   };
 

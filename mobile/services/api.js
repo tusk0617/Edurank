@@ -77,13 +77,13 @@ export const submitAssessment = (id, data) => api.post(`/api/assessment/${id}/su
 
 // Ranking
 export const getRankingIndividu = (periode = 'semua') => api.get(`/api/ranking/individu?periode=${periode}`);
-export const getRankingWilayah = () => api.get('/api/ranking/wilayah');
 export const getRankingSaya = () => api.get('/api/ranking/saya');
-export const getGapAnalisis = () => api.get('/api/ranking/gap/analisis');
 
 // Guru
 export const getGuruSoal = () => api.get('/api/guru/soal');
 export const getGuruModul = () => api.get('/api/guru/modul');
+export const getGuruMapel = () => api.get('/api/guru/mapel');
+export const createModul = (data) => api.post('/api/guru/modul', data);
 export const createSoal = (data) => api.post('/api/guru/soal', data);
 export const updateSoal = (id, data) => api.put(`/api/guru/soal/${id}`, data);
 export const deleteSoal = (id) => api.delete(`/api/guru/soal/${id}`);
@@ -91,7 +91,6 @@ export const getGuruGap = () => api.get('/api/guru/gap');
 
 // Admin
 export const getAdminUsers = () => api.get('/api/admin/users');
-export const getAdminSekolah = () => api.get('/api/admin/sekolah');
 export const getAdminStats = () => api.get('/api/admin/stats');
 export const createUser = (data) => api.post('/api/admin/users', data);
 export const resetUserPassword = (id, password) => api.put(`/api/admin/users/${id}/reset-password`, { password });

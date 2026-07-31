@@ -81,8 +81,8 @@ export default function AdminDashboard() {
               <Text style={styles.statLabel}>Guru</Text>
             </View>
             <View style={[styles.statCard, { borderLeftColor: Colors.warning }]}>
-              <Text style={styles.statNum}>{stats.total_sekolah}</Text>
-              <Text style={styles.statLabel}>Sekolah</Text>
+              <Text style={styles.statNum}>{stats.total_siswa + stats.total_guru}</Text>
+              <Text style={styles.statLabel}>Total Akun</Text>
             </View>
           </View>
         )}

@@ -5,6 +5,17 @@ const { verifyToken, requireRole } = require('../middleware/auth');
 
 const guruOnly = [verifyToken, requireRole('guru')];
 
+// GET /api/guru/mapel — list mata pelajaran untuk picker
+router.get('/mapel', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, nama, warna_hex FROM mata_pelajaran ORDER BY nama');
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/guru/modul — dropdown list
 router.get('/modul', ...guruOnly, async (req, res) => {
   try {
@@ -15,6 +26,28 @@ router.get('/modul', ...guruOnly, async (req, res) => {
        ORDER BY mp.nama, m.urutan`
     );
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/guru/modul — tambah materi baru
+router.post('/modul', ...guruOnly, async (req, res) => {
+  const { judul, mapel_id, level } = req.body;
+  if (!judul || !mapel_id || !level) {
+    return res.status(400).json({ message: 'Judul, kategori, dan tingkat kesulitan wajib diisi' });
+  }
+  try {
+    const [[{ urutan }]] = await pool.query(
+      'SELECT COALESCE(MAX(urutan), 0) + 1 AS urutan FROM modul WHERE mapel_id = ?',
+      [mapel_id]
+    );
+    const [result] = await pool.query(
+      'INSERT INTO modul (mapel_id, judul, level, urutan) VALUES (?, ?, ?, ?)',
+      [mapel_id, judul.trim(), level, urutan]
+    );
+    res.status(201).json({ message: 'Materi berhasil ditambahkan', id: result.insertId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

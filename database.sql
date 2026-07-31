@@ -1,19 +1,7 @@
 -- ============================================================
--- FrontSchooler Database Schema
--- Fokus: Pembelajaran Matematika SMA
+-- FrontSchooler / EduRank — Database Schema
+-- Fokus: Satu Sekolah (SMA Jubilee School, Jakarta Utara)
 -- ============================================================
-
-
--- ============================================================
--- TABEL SEKOLAH
--- ============================================================
-CREATE TABLE IF NOT EXISTS sekolah (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nama_sekolah VARCHAR(150) NOT NULL,
-  alamat TEXT,
-  wilayah VARCHAR(100) DEFAULT 'Jakarta Barat',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 -- ============================================================
 -- TABEL USERS
@@ -24,9 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   role ENUM('siswa','guru','admin') DEFAULT 'siswa',
-  sekolah_id INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE SET NULL
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
@@ -178,27 +164,16 @@ CREATE OR REPLACE VIEW v_ranking_individu AS
 SELECT
   u.id AS user_id,
   u.nama,
-  s.nama_sekolah AS sekolah,
-  s.wilayah,
   COALESCE(SUM(pl.jumlah), 0) AS total_poin,
   RANK() OVER (ORDER BY COALESCE(SUM(pl.jumlah), 0) DESC) AS `rank`
 FROM users u
-LEFT JOIN sekolah s ON u.sekolah_id = s.id
 LEFT JOIN poin_log pl ON pl.user_id = u.id
 WHERE u.role = 'siswa'
-GROUP BY u.id, u.nama, s.nama_sekolah, s.wilayah;
+GROUP BY u.id, u.nama;
 
 -- ============================================================
 -- DATA AWAL (SEED)
 -- ============================================================
-
--- Sekolah
-INSERT INTO sekolah (nama_sekolah, alamat, wilayah) VALUES
-('SMAN 1 Jakarta Barat', 'Jl. Budi Utomo No.7, Grogol', 'Jakarta Barat'),
-('SMAN 2 Jakarta Barat', 'Jl. Kemanggisan Raya, Palmerah', 'Jakarta Barat'),
-('SMAN 3 Jakarta Barat', 'Jl. Kalideres Raya, Kalideres', 'Jakarta Barat'),
-('SMAN 4 Jakarta Barat', 'Jl. Raya Kembangan, Kembangan', 'Jakarta Barat'),
-('SMAN 5 Jakarta Barat', 'Jl. Cengkareng Raya, Cengkareng', 'Jakarta Barat');
 
 -- Sub-Topik Matematika (sebagai mata_pelajaran)
 INSERT INTO mata_pelajaran (id, nama, warna_hex) VALUES
@@ -217,7 +192,7 @@ INSERT INTO badge (id, nama, deskripsi, ikon_nama, warna_hex) VALUES
 (5, 'Ahli Matematika',  'Menyelesaikan semua sub-topik',            'calculator',      '#E24B4A'),
 (6, 'Nilai Sempurna',   'Mendapat skor 100 dalam ujian',            'ribbon',          '#9B59B6');
 
--- Modul Aljabar (mapel_id=1) — 2 modul: Mudah & Menengah
+-- Modul Aljabar (mapel_id=1)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
 (1, 1, 'Persamaan Linear & Pertidaksamaan', 'Pelajari cara menyusun dan menyelesaikan persamaan linear satu variabel serta pertidaksamaan, termasuk sistem persamaan linear dua variabel.', 1, 1, 30, 50),
 (2, 1, 'Fungsi, Komposisi & Invers',        'Memahami konsep fungsi dan notasi f(x), komposisi fungsi (f∘g), fungsi invers f⁻¹(x), serta representasi grafik dan transformasinya.',         2, 2, 45, 80);
@@ -245,7 +220,7 @@ INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_
 (1, 'Jika 3x - 7 = 2x + 5, maka x = ...', '10', '11', '12', '13', 'c'),
 (1, 'Penyelesaian sistem: x + y = 5 dan x - y = 1 adalah...', 'x=2, y=3', 'x=3, y=2', 'x=4, y=1', 'x=1, y=4', 'b'),
 (1, 'Nilai x yang memenuhi 3x + 2 ≤ 11 adalah...', 'x ≤ 3', 'x ≥ 3', 'x ≤ 4', 'x < 3', 'a'),
-(1, 'Jika 5(x - 2) = 3x + 4, maka x = ...', '5', '6', '7', '8', '3'),
+(1, 'Jika 5(x - 2) = 3x + 4, maka x = ...', '5', '6', '7', '8', 'c'),
 (1, 'Faktor dari x² - 9 adalah...', '(x-3)(x-3)', '(x+3)(x+3)', '(x-3)(x+3)', '(x-9)(x+1)', 'c'),
 (1, 'Penyelesaian dari |2x - 4| = 6 adalah...', 'x=5 atau x=-1', 'x=5 atau x=1', 'x=3 atau x=-1', 'x=4 atau x=0', 'a');
 
@@ -313,18 +288,16 @@ INSERT INTO assessment (modul_id, judul, durasi_menit, max_retake, nilai_lulus, 
 (9,  'Ujian Vektor',                            30, 3, 60, DATE_ADD(NOW(), INTERVAL 60 DAY)),
 (10, 'Ujian Limit, Turunan & Integral',         35, 3, 60, DATE_ADD(NOW(), INTERVAL 60 DAY));
 
--- Users (password = "password123" semua, hash akan di-update)
-INSERT INTO users (nama, email, password, role, sekolah_id) VALUES
-('Justin Bryan',  'siswa1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 1),
-('Budi Santoso',  'siswa2@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 2),
-('Citra Dewi',    'siswa3@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 3),
-('Dian Rahayu',   'siswa4@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 4),
-('Eka Putri',     'siswa5@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa', 5),
-('Pak Guru',      'guru1@test.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'guru',  1);
+-- Users demo (password = "password123")
+INSERT INTO users (nama, email, password, role) VALUES
+('Justin Bryan',  'siswa1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa'),
+('Budi Santoso',  'siswa2@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa'),
+('Citra Dewi',    'siswa3@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa'),
+('Dian Rahayu',   'siswa4@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa'),
+('Eka Putri',     'siswa5@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'siswa'),
+('Pak Guru',      'guru1@test.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'guru');
 
 -- Modul Progress awal
--- Aljabar: modul 1 (Mudah) tersedia dulu, modul 2 (Menengah) terkunci
--- Trig=5, Statistika=7, Geometri=9, Kalkulus=10 masing-masing tersedia
 INSERT INTO modul_progress (user_id, modul_id, status) VALUES
 (1, 1, 'tersedia'), (1, 2, 'terkunci'), (1, 5, 'tersedia'), (1, 7, 'tersedia'), (1, 9, 'tersedia'), (1, 10, 'tersedia'),
 (2, 1, 'tersedia'), (2, 2, 'terkunci'), (2, 5, 'tersedia'), (2, 7, 'tersedia'), (2, 9, 'tersedia'), (2, 10, 'tersedia'),

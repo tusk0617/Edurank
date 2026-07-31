@@ -15,10 +15,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT u.*, s.nama_sekolah, s.wilayah
-       FROM users u
-       LEFT JOIN sekolah s ON u.sekolah_id = s.id
-       WHERE u.email = ?`,
+      `SELECT u.* FROM users u WHERE u.email = ?`,
       [email]
     );
 
@@ -48,9 +45,9 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/register
+// POST /api/auth/register — hanya membuat akun siswa
 router.post('/register', async (req, res) => {
-  const { nama, email, password, role, sekolah_id } = req.body;
+  const { nama, email, password } = req.body;
 
   if (!nama || !email || !password) {
     return res.status(400).json({ message: 'Nama, email, dan password wajib diisi' });
@@ -64,8 +61,8 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      'INSERT INTO users (nama, email, password, role, sekolah_id) VALUES (?, ?, ?, ?, ?)',
-      [nama, email, hashedPassword, role || 'siswa', sekolah_id || null]
+      'INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, ?)',
+      [nama, email, hashedPassword, 'siswa']
     );
 
     res.status(201).json({ message: 'Registrasi berhasil', id: result.insertId });
@@ -79,10 +76,8 @@ router.post('/register', async (req, res) => {
 router.get('/me', verifyToken, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT u.id, u.nama, u.email, u.role, u.sekolah_id, u.created_at,
-              s.nama_sekolah, s.wilayah
+      `SELECT u.id, u.nama, u.email, u.role, u.created_at
        FROM users u
-       LEFT JOIN sekolah s ON u.sekolah_id = s.id
        WHERE u.id = ?`,
       [req.user.id]
     );

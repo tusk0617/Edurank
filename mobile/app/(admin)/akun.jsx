@@ -6,14 +6,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getAdminUsers, getAdminSekolah, createUser, resetUserPassword, deleteUser } from '../../services/api';
+import { getAdminUsers, createUser, resetUserPassword, deleteUser } from '../../services/api';
 import Colors from '../../constants/Colors';
 
-const BLANK_FORM = { nama: '', email: '', password: '', role: 'siswa', sekolah_id: '' };
+const BLANK_FORM = { nama: '', email: '', password: '', role: 'siswa' };
 
 export default function KelolaAkun() {
   const [users, setUsers] = useState([]);
-  const [sekolahList, setSekolahList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filterRole, setFilterRole] = useState('');
@@ -25,9 +24,8 @@ export default function KelolaAkun() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [usersRes, sekolahRes] = await Promise.all([getAdminUsers(), getAdminSekolah()]);
-      setUsers(usersRes.data);
-      setSekolahList(sekolahRes.data);
+      const res = await getAdminUsers();
+      setUsers(res.data);
     } catch {
       Alert.alert('Error', 'Gagal memuat data');
     } finally {
@@ -54,7 +52,6 @@ export default function KelolaAkun() {
         email: form.email.trim().toLowerCase(),
         password: form.password,
         role: form.role,
-        sekolah_id: form.sekolah_id ? parseInt(form.sekolah_id) : null,
       });
       setModalVisible(false);
       setForm(BLANK_FORM);
@@ -166,7 +163,6 @@ export default function KelolaAkun() {
                 </View>
               </View>
               <Text style={styles.userEmail}>{item.email}</Text>
-              {item.nama_sekolah && <Text style={styles.userSekolah}>{item.nama_sekolah}</Text>}
             </View>
             <View style={styles.userActions}>
               <TouchableOpacity
@@ -254,27 +250,6 @@ export default function KelolaAkun() {
                 </TouchableOpacity>
               ))}
             </View>
-
-            <Text style={styles.fieldLabel}>Sekolah (opsional)</Text>
-            <ScrollView style={{ maxHeight: 120 }} nestedScrollEnabled>
-              <TouchableOpacity
-                style={[styles.sekolahChip, !form.sekolah_id && styles.sekolahChipActive]}
-                onPress={() => setForm(f => ({ ...f, sekolah_id: '' }))}
-              >
-                <Text style={[styles.sekolahChipText, !form.sekolah_id && styles.sekolahChipTextActive]}>Tidak ada</Text>
-              </TouchableOpacity>
-              {sekolahList.map(s => (
-                <TouchableOpacity
-                  key={s.id}
-                  style={[styles.sekolahChip, form.sekolah_id == s.id && styles.sekolahChipActive]}
-                  onPress={() => setForm(f => ({ ...f, sekolah_id: s.id.toString() }))}
-                >
-                  <Text style={[styles.sekolahChipText, form.sekolah_id == s.id && styles.sekolahChipTextActive]}>
-                    {s.nama_sekolah}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
             <View style={{ height: 40 }} />
           </ScrollView>
         </SafeAreaView>
@@ -335,7 +310,6 @@ const styles = StyleSheet.create({
   roleBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5 },
   roleText: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
   userEmail: { fontSize: 12, color: Colors.muted, marginTop: 2 },
-  userSekolah: { fontSize: 11, color: Colors.primary, marginTop: 1 },
   userActions: { flexDirection: 'row', gap: 6 },
   actionBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' },
   fab: {
@@ -364,10 +338,6 @@ const styles = StyleSheet.create({
   roleBtnActive: { borderColor: Colors.warning, backgroundColor: Colors.warning },
   roleBtnText: { fontSize: 14, fontWeight: '700', color: Colors.muted },
   roleBtnTextActive: { color: '#fff' },
-  sekolahChip: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, marginBottom: 6, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.card },
-  sekolahChipActive: { borderColor: Colors.warning, backgroundColor: Colors.warning + '15' },
-  sekolahChipText: { fontSize: 13, color: Colors.muted },
-  sekolahChipTextActive: { color: Colors.warning, fontWeight: '700' },
   overlayBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   resetBox: { backgroundColor: Colors.card, borderRadius: 20, padding: 24, width: '100%' },
   resetTitle: { fontSize: 18, fontWeight: '800', color: Colors.text },

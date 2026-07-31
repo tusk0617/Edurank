@@ -10,23 +10,11 @@ const adminOnly = [verifyToken, requireRole('admin')];
 router.get('/users', ...adminOnly, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT u.id, u.nama, u.email, u.role, u.created_at, s.nama_sekolah
-       FROM users u
-       LEFT JOIN sekolah s ON u.sekolah_id = s.id
-       WHERE u.role IN ('siswa', 'guru')
-       ORDER BY u.role DESC, u.nama ASC`
+      `SELECT id, nama, email, role, created_at
+       FROM users
+       WHERE role IN ('siswa', 'guru')
+       ORDER BY role DESC, nama ASC`
     );
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// GET /api/admin/sekolah — dropdown
-router.get('/sekolah', ...adminOnly, async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT id, nama_sekolah, wilayah FROM sekolah ORDER BY nama_sekolah');
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -39,8 +27,7 @@ router.get('/stats', ...adminOnly, async (req, res) => {
   try {
     const [[{ total_siswa }]] = await pool.query("SELECT COUNT(*) AS total_siswa FROM users WHERE role = 'siswa'");
     const [[{ total_guru }]] = await pool.query("SELECT COUNT(*) AS total_guru FROM users WHERE role = 'guru'");
-    const [[{ total_sekolah }]] = await pool.query('SELECT COUNT(*) AS total_sekolah FROM sekolah');
-    res.json({ total_siswa, total_guru, total_sekolah });
+    res.json({ total_siswa, total_guru });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -49,7 +36,7 @@ router.get('/stats', ...adminOnly, async (req, res) => {
 
 // POST /api/admin/users
 router.post('/users', ...adminOnly, async (req, res) => {
-  const { nama, email, password, role, sekolah_id } = req.body;
+  const { nama, email, password, role } = req.body;
   if (!nama || !email || !password || !role) {
     return res.status(400).json({ message: 'Nama, email, password, dan role wajib diisi' });
   }
@@ -63,8 +50,8 @@ router.post('/users', ...adminOnly, async (req, res) => {
     }
     const hashed = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      'INSERT INTO users (nama, email, password, role, sekolah_id) VALUES (?, ?, ?, ?, ?)',
-      [nama, email, hashed, role, sekolah_id || null]
+      'INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, ?)',
+      [nama, email, hashed, role]
     );
     res.status(201).json({ message: 'Akun berhasil dibuat', id: result.insertId });
   } catch (err) {
