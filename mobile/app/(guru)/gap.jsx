@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, ActivityIndicator,
-  RefreshControl, TouchableOpacity, FlatList,
+  RefreshControl, TouchableOpacity, FlatList, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { getGuruGap, getGuruGapSiswa } from '../../services/api';
+import { Ionicons } from '@expo/vector-icons';
+import { getGuruGap, getGuruGapSiswa, getGuruGapModul, getGuruGapModulSoal } from '../../services/api';
 import Colors from '../../constants/Colors';
 
 const THRESHOLD_PERHATIAN = 60;
@@ -13,16 +14,28 @@ const THRESHOLD_PERHATIAN = 60;
 export default function GuruGap() {
   const [data, setData] = useState(null);
   const [siswaData, setSiswaData] = useState([]);
+  const [modulList, setModulList] = useState([]);
   const [activeTab, setActiveTab] = useState('soal');
   const [filterPerhatian, setFilterPerhatian] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Modal soal detail per modul
+  const [selectedModul, setSelectedModul] = useState(null);
+  const [modulSoal, setModulSoal] = useState([]);
+  const [loadingSoal, setLoadingSoal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const fetchData = useCallback(async () => {
     try {
-      const [gapRes, siswaRes] = await Promise.all([getGuruGap(), getGuruGapSiswa()]);
+      const [gapRes, siswaRes, modulRes] = await Promise.all([
+        getGuruGap(),
+        getGuruGapSiswa(),
+        getGuruGapModul(),
+      ]);
       setData(gapRes.data);
       setSiswaData(siswaRes.data);
+      setModulList(modulRes.data);
     } catch {
       setData(null);
     } finally {
@@ -33,6 +46,20 @@ export default function GuruGap() {
 
   useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
 
+  const openModulSoal = async (modul) => {
+    setSelectedModul(modul);
+    setModalVisible(true);
+    setLoadingSoal(true);
+    try {
+      const res = await getGuruGapModulSoal(modul.modul_id);
+      setModulSoal(res.data);
+    } catch {
+      setModulSoal([]);
+    } finally {
+      setLoadingSoal(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -41,14 +68,12 @@ export default function GuruGap() {
     );
   }
 
-  // warna untuk persen-salah (lebih tinggi = lebih buruk)
   const getBarColor = (persen) => {
     if (persen >= 60) return Colors.danger;
     if (persen >= 40) return Colors.warning;
     return Colors.success;
   };
 
-  // warna untuk capaian siswa (lebih tinggi = lebih baik)
   const getCapaianColor = (persen) => {
     if (persen >= THRESHOLD_PERHATIAN) return Colors.success;
     if (persen >= 40) return Colors.warning;
@@ -82,7 +107,7 @@ export default function GuruGap() {
       </View>
 
       {activeTab === 'soal' ? (
-        /* ===== TAB ANALISIS SOAL (tidak berubah) ===== */
+        /* ===== TAB ANALISIS SOAL ===== */
         <ScrollView
           style={styles.container}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.primary} />}
@@ -97,15 +122,21 @@ export default function GuruGap() {
               <Text style={styles.pageTitle}>Gap Analisis</Text>
               <Text style={styles.pageSubtitle}>Persentase kesalahan siswa per mata pelajaran</Text>
 
+              {/* Bar chart per mapel */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Persentase Jawaban Salah per Mapel</Text>
                 {data.per_mapel.map((item, idx) => (
                   <View key={idx} style={styles.barRow}>
                     <Text style={styles.barLabel} numberOfLines={1}>{item.mapel}</Text>
                     <View style={styles.barTrack}>
-                      <View style={[styles.barFill, { width: `${(item.persen_salah / maxPersen) * 100}%`, backgroundColor: getBarColor(parseFloat(item.persen_salah)) }]} />
+                      <View style={[styles.barFill, {
+                        width: `${(item.persen_salah / maxPersen) * 100}%`,
+                        backgroundColor: getBarColor(parseFloat(item.persen_salah)),
+                      }]} />
                     </View>
-                    <Text style={[styles.barPct, { color: getBarColor(parseFloat(item.persen_salah)) }]}>{item.persen_salah}%</Text>
+                    <Text style={[styles.barPct, { color: getBarColor(parseFloat(item.persen_salah)) }]}>
+                      {item.persen_salah}%
+                    </Text>
                   </View>
                 ))}
                 <View style={styles.legendRow}>
@@ -115,27 +146,38 @@ export default function GuruGap() {
                 </View>
               </View>
 
-              {data.top_soal_salah?.length > 0 && (
+              {/* Modul dengan tingkat kesalahan */}
+              {modulList.length > 0 && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Top Soal Paling Banyak Salah</Text>
-                  {data.top_soal_salah.map((item, idx) => (
-                    <View key={idx} style={styles.soalRow}>
-                      <View style={[styles.rankBadge, { backgroundColor: idx < 3 ? Colors.danger : Colors.warning }]}>
-                        <Text style={styles.rankText}>{idx + 1}</Text>
-                      </View>
-                      <View style={styles.soalInfo}>
-                        <Text style={styles.soalMapel}>{item.mapel} — {item.modul}</Text>
-                        <Text style={styles.soalPertanyaan} numberOfLines={2}>{item.pertanyaan}</Text>
-                        <View style={styles.soalStat}>
-                          <Text style={styles.soalStatText}>{item.total_salah}/{item.total_jawaban} salah</Text>
-                          <Text style={[styles.soalPct, { color: getBarColor(parseFloat(item.persen_salah)) }]}>{item.persen_salah}%</Text>
+                  <Text style={styles.sectionTitle}>Soal per Modul</Text>
+                  <Text style={styles.sectionHint}>Tap modul untuk lihat detail soal</Text>
+                  {modulList.map((item, idx) => (
+                    <TouchableOpacity
+                      key={item.modul_id}
+                      style={[styles.modulRow, idx < modulList.length - 1 && styles.modulRowBorder]}
+                      onPress={() => openModulSoal(item)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.modulLeft}>
+                        <View style={[styles.mapelDot, { backgroundColor: item.warna_hex || Colors.secondary }]} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.modulJudul} numberOfLines={1}>{item.judul}</Text>
+                          <Text style={styles.modulMapel}>{item.nama_mapel} · {item.total_soal} soal</Text>
                         </View>
                       </View>
-                    </View>
+                      <View style={styles.modulRight}>
+                        <Text style={[styles.modulPersen, { color: getBarColor(parseFloat(item.persen_salah)) }]}>
+                          {item.persen_salah}%
+                        </Text>
+                        <Text style={styles.modulSalahLabel}>salah</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={Colors.muted} style={{ marginLeft: 6 }} />
+                    </TouchableOpacity>
                   ))}
                 </View>
               )}
 
+              {/* Ringkasan */}
               {data.ringkasan && (
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Ringkasan Data</Text>
@@ -153,7 +195,6 @@ export default function GuruGap() {
       ) : (
         /* ===== TAB ANALISIS MURID ===== */
         <View style={{ flex: 1 }}>
-          {/* Filter */}
           <View style={styles.filterRow}>
             <TouchableOpacity
               style={[styles.filterBtn, !filterPerhatian && styles.filterBtnActive]}
@@ -216,6 +257,66 @@ export default function GuruGap() {
           />
         </View>
       )}
+
+      {/* ===== MODAL DETAIL SOAL PER MODUL ===== */}
+      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
+        <SafeAreaView style={styles.modalSafe}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Ionicons name="close" size={24} color={Colors.text} />
+            </TouchableOpacity>
+            <View style={{ flex: 1, marginHorizontal: 12 }}>
+              <Text style={styles.modalTitle} numberOfLines={1}>{selectedModul?.judul}</Text>
+              <Text style={styles.modalSubtitle}>{selectedModul?.nama_mapel}</Text>
+            </View>
+            <View style={[styles.mapelDot, { backgroundColor: selectedModul?.warna_hex || Colors.secondary, width: 14, height: 14, borderRadius: 7 }]} />
+          </View>
+
+          {loadingSoal ? (
+            <View style={styles.center}>
+              <ActivityIndicator size="large" color={Colors.secondary} />
+            </View>
+          ) : modulSoal.length === 0 ? (
+            <View style={styles.center}>
+              <Text style={styles.emptyText}>Belum ada jawaban untuk modul ini</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={modulSoal}
+              keyExtractor={item => item.id.toString()}
+              contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+              ListHeaderComponent={
+                <Text style={styles.modalHint}>
+                  Diurutkan: paling banyak salah → paling banyak benar
+                </Text>
+              }
+              renderItem={({ item, index }) => {
+                const persen = parseFloat(item.persen_salah) || 0;
+                const color = getBarColor(persen);
+                return (
+                  <View style={styles.soalDetailCard}>
+                    <View style={styles.soalDetailHeader}>
+                      <View style={[styles.rankBadge, { backgroundColor: index < 3 ? Colors.danger : index < 6 ? Colors.warning : Colors.success }]}>
+                        <Text style={styles.rankText}>{index + 1}</Text>
+                      </View>
+                      <Text style={styles.soalDetailText} numberOfLines={3}>{item.pertanyaan}</Text>
+                    </View>
+                    <View style={styles.soalDetailStats}>
+                      <Text style={styles.soalStatText}>
+                        {item.total_salah}/{item.total_jawaban} salah
+                      </Text>
+                      <View style={styles.soalDetailBar}>
+                        <View style={[styles.soalDetailBarFill, { width: `${Math.min(persen, 100)}%`, backgroundColor: color }]} />
+                      </View>
+                      <Text style={[styles.soalDetailPct, { color }]}>{persen}%</Text>
+                    </View>
+                  </View>
+                );
+              }}
+            />
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -226,12 +327,7 @@ const styles = StyleSheet.create({
   emptyText: { color: Colors.muted, fontSize: 15 },
 
   // Tab switcher
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: Colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
+  tabContainer: { flexDirection: 'row', backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border },
   tab: { flex: 1, paddingVertical: 13, alignItems: 'center' },
   tabActive: { borderBottomWidth: 2, borderBottomColor: Colors.secondary },
   tabText: { fontSize: 13, fontWeight: '600', color: Colors.muted },
@@ -242,7 +338,8 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 22, fontWeight: '800', color: Colors.text },
   pageSubtitle: { fontSize: 13, color: Colors.muted, marginTop: 2, marginBottom: 20 },
   section: { backgroundColor: Colors.card, borderRadius: 16, padding: 16, marginBottom: 16, elevation: 2 },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: Colors.text, marginBottom: 14 },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: Colors.text, marginBottom: 4 },
+  sectionHint: { fontSize: 11, color: Colors.muted, marginBottom: 14 },
   barRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   barLabel: { width: 90, fontSize: 12, color: Colors.text, fontWeight: '500' },
   barTrack: { flex: 1, height: 12, backgroundColor: Colors.background, borderRadius: 6, marginHorizontal: 8, overflow: 'hidden' },
@@ -252,15 +349,18 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
   legendText: { fontSize: 11, color: Colors.muted },
-  soalRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  rankBadge: { width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: 10, marginTop: 2 },
-  rankText: { fontSize: 13, fontWeight: '800', color: '#fff' },
-  soalInfo: { flex: 1 },
-  soalMapel: { fontSize: 10, color: Colors.muted, fontWeight: '600', marginBottom: 2 },
-  soalPertanyaan: { fontSize: 13, color: Colors.text, lineHeight: 18, marginBottom: 4 },
-  soalStat: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  soalStatText: { fontSize: 11, color: Colors.muted },
-  soalPct: { fontSize: 13, fontWeight: '700' },
+
+  // Modul list
+  modulRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
+  modulRowBorder: { borderBottomWidth: 1, borderBottomColor: Colors.border },
+  modulLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  mapelDot: { width: 12, height: 12, borderRadius: 6 },
+  modulJudul: { fontSize: 13, fontWeight: '600', color: Colors.text },
+  modulMapel: { fontSize: 11, color: Colors.muted, marginTop: 1 },
+  modulRight: { alignItems: 'flex-end', marginRight: 2 },
+  modulPersen: { fontSize: 16, fontWeight: '800' },
+  modulSalahLabel: { fontSize: 10, color: Colors.muted },
+
   statsGrid: { flexDirection: 'row', justifyContent: 'space-around' },
   statBox: { alignItems: 'center' },
   statNum: { fontSize: 26, fontWeight: '800', color: Colors.text },
@@ -268,10 +368,7 @@ const styles = StyleSheet.create({
 
   // Analisis Murid
   filterRow: { flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
-  filterBtn: {
-    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-    borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card,
-  },
+  filterBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card },
   filterBtnActive: { backgroundColor: Colors.secondary, borderColor: Colors.secondary },
   filterBtnDanger: { backgroundColor: Colors.danger, borderColor: Colors.danger },
   filterBtnText: { fontSize: 12, fontWeight: '600', color: Colors.muted },
@@ -288,4 +385,27 @@ const styles = StyleSheet.create({
   capaianTrack: { flex: 1, height: 8, backgroundColor: Colors.background, borderRadius: 4, overflow: 'hidden' },
   capaianFill: { height: '100%', borderRadius: 4 },
   capaianPct: { width: 42, fontSize: 12, fontWeight: '700', textAlign: 'right' },
+
+  // Modal soal detail
+  modalSafe: { flex: 1, backgroundColor: Colors.background },
+  modalHeader: {
+    flexDirection: 'row', alignItems: 'center', padding: 16,
+    backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border,
+  },
+  modalTitle: { fontSize: 15, fontWeight: '700', color: Colors.text },
+  modalSubtitle: { fontSize: 11, color: Colors.muted, marginTop: 1 },
+  modalHint: { fontSize: 11, color: Colors.muted, marginBottom: 12, fontStyle: 'italic' },
+  soalDetailCard: {
+    backgroundColor: Colors.card, borderRadius: 12, padding: 12,
+    marginBottom: 10, elevation: 1,
+  },
+  soalDetailHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 10 },
+  rankBadge: { width: 26, height: 26, borderRadius: 13, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
+  rankText: { fontSize: 12, fontWeight: '800', color: '#fff' },
+  soalDetailText: { flex: 1, fontSize: 13, color: Colors.text, lineHeight: 18 },
+  soalDetailStats: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  soalStatText: { fontSize: 11, color: Colors.muted, width: 80 },
+  soalDetailBar: { flex: 1, height: 6, backgroundColor: Colors.background, borderRadius: 3, overflow: 'hidden' },
+  soalDetailBarFill: { height: '100%', borderRadius: 3 },
+  soalDetailPct: { fontSize: 12, fontWeight: '700', width: 38, textAlign: 'right' },
 });

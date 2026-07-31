@@ -159,6 +159,59 @@ router.get('/gap/siswa', ...guruOnly, async (req, res) => {
   }
 });
 
+// GET /api/guru/gap/modul — daftar modul dengan statistik jawaban salah
+router.get('/gap/modul', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         m.id AS modul_id,
+         m.judul,
+         mp.nama AS nama_mapel,
+         mp.warna_hex,
+         COUNT(DISTINCT s.id) AS total_soal,
+         COUNT(js.id) AS total_jawaban,
+         SUM(CASE WHEN js.benar = 0 THEN 1 ELSE 0 END) AS total_salah,
+         ROUND(SUM(CASE WHEN js.benar = 0 THEN 1 ELSE 0 END) / NULLIF(COUNT(js.id), 0) * 100, 1) AS persen_salah
+       FROM modul m
+       JOIN mata_pelajaran mp ON m.mapel_id = mp.id
+       LEFT JOIN soal s ON s.modul_id = m.id
+       LEFT JOIN jawaban_siswa js ON js.soal_id = s.id
+       GROUP BY m.id, m.judul, mp.nama, mp.warna_hex
+       HAVING total_jawaban > 0
+       ORDER BY persen_salah DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/guru/gap/modul/:id — soal dalam modul diurutkan persen_salah DESC
+router.get('/gap/modul/:id', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         s.id,
+         s.pertanyaan,
+         s.jawaban_benar,
+         COUNT(js.id) AS total_jawaban,
+         SUM(CASE WHEN js.benar = 0 THEN 1 ELSE 0 END) AS total_salah,
+         ROUND(SUM(CASE WHEN js.benar = 0 THEN 1 ELSE 0 END) / NULLIF(COUNT(js.id), 0) * 100, 1) AS persen_salah
+       FROM soal s
+       LEFT JOIN jawaban_siswa js ON js.soal_id = s.id
+       WHERE s.modul_id = ?
+       GROUP BY s.id, s.pertanyaan, s.jawaban_benar
+       ORDER BY persen_salah DESC, total_salah DESC`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/guru/gap — persentase salah per mata pelajaran + top soal paling banyak salah
 router.get('/gap', ...guruOnly, async (req, res) => {
   try {
