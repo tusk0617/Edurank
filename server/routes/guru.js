@@ -121,6 +121,44 @@ router.delete('/soal/:id', ...guruOnly, async (req, res) => {
   }
 });
 
+const THRESHOLD_PERHATIAN = 60;
+
+// GET /api/guru/gap/siswa — analisis capaian poin per siswa
+router.get('/gap/siswa', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         u.id AS user_id,
+         u.nama,
+         COUNT(js.id) AS total_jawaban,
+         COALESCE(SUM(CASE WHEN js.benar = 1 THEN s.bobot_poin ELSE 0 END), 0) AS poin_terkumpul,
+         COALESCE(SUM(s.bobot_poin), 0) AS total_poin_seharusnya,
+         CASE
+           WHEN COALESCE(SUM(s.bobot_poin), 0) = 0 THEN 0
+           ELSE ROUND(
+             SUM(CASE WHEN js.benar = 1 THEN s.bobot_poin ELSE 0 END) /
+             SUM(s.bobot_poin) * 100, 1
+           )
+         END AS persentase_capaian
+       FROM users u
+       LEFT JOIN hasil_assessment ha ON ha.user_id = u.id
+       LEFT JOIN jawaban_siswa js ON js.hasil_id = ha.id
+       LEFT JOIN soal s ON js.soal_id = s.id
+       WHERE u.role = 'siswa'
+       GROUP BY u.id, u.nama
+       ORDER BY persentase_capaian ASC`
+    );
+    const siswa = rows.map(row => ({
+      ...row,
+      perlu_perhatian: parseFloat(row.persentase_capaian) < THRESHOLD_PERHATIAN,
+    }));
+    res.json(siswa);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/guru/gap — persentase salah per mata pelajaran + top soal paling banyak salah
 router.get('/gap', ...guruOnly, async (req, res) => {
   try {

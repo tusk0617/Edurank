@@ -88,6 +88,7 @@ export const createSoal = (data) => api.post('/api/guru/soal', data);
 export const updateSoal = (id, data) => api.put(`/api/guru/soal/${id}`, data);
 export const deleteSoal = (id) => api.delete(`/api/guru/soal/${id}`);
 export const getGuruGap = () => api.get('/api/guru/gap');
+export const getGuruGapSiswa = () => api.get('/api/guru/gap/siswa');
 
 // Admin
 export const getAdminUsers = () => api.get('/api/admin/users');
