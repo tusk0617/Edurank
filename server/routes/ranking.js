@@ -80,9 +80,9 @@ router.get('/saya', verifyToken, async (req, res) => {
   }
 });
 
-// GET /api/gap/analisis (guru & advisor only)
+// GET /api/gap/analisis (guru only)
 router.get('/gap/analisis', verifyToken, async (req, res) => {
-  if (!['guru', 'advisor'].includes(req.user.role)) {
+  if (req.user.role !== 'guru') {
     return res.status(403).json({ message: 'Akses ditolak' });
   }
 

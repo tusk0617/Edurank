@@ -23,8 +23,14 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await login(email.trim(), password);
-      router.replace('/(tabs)/home');
+      const loggedUser = await login(email.trim(), password);
+      if (loggedUser.role === 'guru') {
+        router.replace('/(guru)/dashboard');
+      } else if (loggedUser.role === 'admin') {
+        router.replace('/(admin)/dashboard');
+      } else {
+        router.replace('/(tabs)/home');
+      }
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal login. Periksa koneksi internet.';
       Alert.alert('Login Gagal', msg);

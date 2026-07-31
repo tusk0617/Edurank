@@ -82,10 +82,22 @@ export default function AssessmentSoalScreen() {
     if (autoSubmit) {
       confirm();
     } else {
-      Alert.alert('Konfirmasi Submit', 'Yakin ingin mengumpulkan jawaban?', [
-        { text: 'Batal', style: 'cancel' },
-        { text: 'Submit', onPress: confirm },
-      ]);
+      const belumDijawab = soalList.length - Object.keys(jawaban).length;
+      if (belumDijawab > 0) {
+        Alert.alert(
+          'Soal Belum Lengkap',
+          `Masih ada ${belumDijawab} soal yang belum dijawab. Soal yang belum dijawab akan dianggap salah.\n\nYakin ingin mengumpulkan?`,
+          [
+            { text: 'Kembali', style: 'cancel' },
+            { text: 'Tetap Submit', style: 'destructive', onPress: confirm },
+          ]
+        );
+      } else {
+        Alert.alert('Konfirmasi Submit', 'Yakin ingin mengumpulkan jawaban?', [
+          { text: 'Batal', style: 'cancel' },
+          { text: 'Submit', onPress: confirm },
+        ]);
+      }
     }
   }, [jawaban, soalList, sesiId, id]);
 
@@ -146,7 +158,7 @@ export default function AssessmentSoalScreen() {
           </View>
 
           <TouchableOpacity style={styles.actionBtnOutline} onPress={() => setScreen(SCREENS.PEMBAHASAN)}>
-            <Text style={styles.actionBtnOutlineText}>📋 Lihat Pembahasan</Text>
+            <Text style={styles.actionBtnOutlineText}>📋 Lihat Hasil</Text>
           </TouchableOpacity>
 
           {hasil.bisa_remedial && (

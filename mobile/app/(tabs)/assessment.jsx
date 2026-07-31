@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getAssessment } from '../../services/api';
-import { scheduleDeadlineNotifications } from '../../services/notifications';
 import Card from '../../components/ui/Card';
 import Colors from '../../constants/Colors';
 
@@ -27,7 +26,6 @@ export default function AssessmentScreen() {
     try {
       const res = await getAssessment();
       setAssessments(res.data);
-      scheduleDeadlineNotifications(res.data);
     } catch (err) {
       console.error(err);
     } finally {

@@ -15,8 +15,8 @@ const getInitials = (nama) => {
   return nama.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 };
 
-const ROLE_LABEL = { siswa: 'Siswa', guru: 'Guru', advisor: 'Advisor' };
-const ROLE_COLOR = { siswa: Colors.primary, guru: Colors.secondary, advisor: Colors.warning };
+const ROLE_LABEL = { siswa: 'Siswa', guru: 'Guru' };
+const ROLE_COLOR = { siswa: Colors.primary, guru: Colors.secondary };
 
 export default function ProfilScreen() {
   const { user, logout } = useAuth();

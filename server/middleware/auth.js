@@ -17,4 +17,11 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken };
+const requireRole = (...roles) => (req, res, next) => {
+  if (!roles.includes(req.user?.role)) {
+    return res.status(403).json({ message: 'Akses ditolak' });
+  }
+  next();
+};
+
+module.exports = { verifyToken, requireRole };

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\app\\\\\\(auth\\)\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\app\\\\\\(tabs\\)\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\app\\\\assessment\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\components\\\\ui\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\context\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\services\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\mobile\\\\constants\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\server\\\\routes\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"D:\\\\coding\\\\Edurank\\\\server\\\\middleware\")"
+    ]
+  }
+}

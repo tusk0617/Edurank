@@ -23,9 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
   nama VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
-  role ENUM('siswa','guru','advisor','admin') DEFAULT 'siswa',
+  role ENUM('siswa','guru','admin') DEFAULT 'siswa',
   sekolah_id INT,
-  foto_url VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE SET NULL
 );

@@ -79,7 +79,7 @@ router.post('/register', async (req, res) => {
 router.get('/me', verifyToken, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT u.id, u.nama, u.email, u.role, u.sekolah_id, u.foto_url, u.created_at,
+      `SELECT u.id, u.nama, u.email, u.role, u.sekolah_id, u.created_at,
               s.nama_sekolah, s.wilayah
        FROM users u
        LEFT JOIN sekolah s ON u.sekolah_id = s.id

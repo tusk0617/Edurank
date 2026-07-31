@@ -1,13 +1,22 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert,
+  ActivityIndicator, Alert, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getModulById, mulaiModul, selesaiModul } from '../../services/api';
 import Colors from '../../constants/Colors';
+
+const MATERI_URL = {
+  1:  'https://id.khanacademy.org/math/algebra',
+  2:  'https://id.khanacademy.org/math/algebra/x2f8bb11595b61c86:functions',
+  5:  'https://id.khanacademy.org/math/trigonometry',
+  7:  'https://id.khanacademy.org/math/statistics-probability',
+  9:  'https://id.khanacademy.org/math/precalculus/x9e81a4f98389efdf:vectors',
+  10: 'https://id.khanacademy.org/math/calculus-1',
+};
 
 const LEVEL_LABEL = { 1: 'Mudah', 2: 'Menengah', 3: 'Sulit' };
 const LEVEL_COLOR = { 1: Colors.secondary, 2: Colors.warning, 3: Colors.danger };
@@ -188,7 +197,15 @@ export default function ModulDetailScreen() {
       <View style={styles.footer}>
         {(isTersedia || isSedang) && (
           <View style={styles.btnRow}>
-            <TouchableOpacity style={[styles.btnHalf, styles.btnOutline]} disabled>
+            <TouchableOpacity
+              style={[styles.btnHalf, styles.btnOutline]}
+              onPress={() => {
+                const url = MATERI_URL[parseInt(id)] || 'https://id.khanacademy.org/math';
+                Linking.openURL(url).catch(() =>
+                  Alert.alert('Gagal', 'Tidak dapat membuka materi. Periksa koneksi internet.')
+                );
+              }}
+            >
               <Text style={[styles.btnText, { color: modul.warna_hex }]}>Lanjutkan</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.btnHalf, { backgroundColor: Colors.secondary }]} onPress={handleSelesai} disabled={actionLoading}>

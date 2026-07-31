@@ -20,7 +20,7 @@ export default function DashboardScreen() {
 
   const fetchData = useCallback(async () => {
     try {
-      const isGuruAdvisorRole = ['guru', 'advisor'].includes(user?.role);
+      const isGuruAdvisorRole = user?.role === 'guru';
       if (isGuruAdvisorRole) {
         setData({});
         return;
@@ -75,7 +75,7 @@ export default function DashboardScreen() {
     );
   }
 
-  const isGuruAdvisor = ['guru', 'advisor'].includes(user?.role);
+  const isGuruAdvisor = user?.role === 'guru';
 
   return (
     <SafeAreaView style={styles.safe}>

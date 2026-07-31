@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "WebSearch",
+      "Bash(dir D:\\\\coding\\\\Edurank /s /b)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(del \"D:\\\\coding\\\\Edurank\\\\mobile\\\\app\\\\\\(auth\\)\\\\login.jsx\")",
+      "PowerShell(Stop-Process -Id 25968 -Force)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s \"https://app-7b28b5c9-226a-4f4b-a64e-4cc73da21c44.cleverapps.io/api/ranking/gap/analisis\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiZW1haWwiOiJndXJ1MUB0ZXN0LmNvbSIsInJvbGUiOiJndXJ1IiwiaWF0IjoxNzg0MTAzNTk3LCJleHAiOjE3ODQ3MDgzOTd9.WTBBaM-N7pl9FiHMoQEomUutlVsSV07X4l3W4iCTCDY\")",
+      "Bash('C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -h balab4q2zekvunkro2x5-mysql.services.clever-cloud.com -P 3306 -u uldhyvkrfd0d5cjf -pjsGSAQqHDL7FX5fGZEhq balab4q2zekvunkro2x5 -e ' *)",
+      "Bash(\"C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe\" -h balab4q2zekvunkro2x5-mysql.services.clever-cloud.com -P 3306 -u uldhyvkrfd0d5cjf -pjsGSAQqHDL7FX5fGZEhq balab4q2zekvunkro2x5)",
+      "Bash(npm install *)",
+      "Bash(npx expo *)",
+      "Bash(\"C:/xampp/mysql/bin/mysql.exe\" -h balab4q2zekvunkro2x5-mysql.services.clever-cloud.com -P 3306 -u uldhyvkrfd0d5cjf -pjsGSAQqHDL7FX5fGZEhq balab4q2zekvunkro2x5 -e \"SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS jawaban_siswa, hasil_assessment, assessment, modul_progress, soal, poin_log, user_badge, badge, modul, mata_pelajaran, users, sekolah; DROP VIEW IF EXISTS v_ranking_individu; SET FOREIGN_KEY_CHECKS=1;\")",
+      "Bash(\"C:/xampp/mysql/bin/mysql.exe\" -h balab4q2zekvunkro2x5-mysql.services.clever-cloud.com -P 3306 -u uldhyvkrfd0d5cjf -pjsGSAQqHDL7FX5fGZEhq balab4q2zekvunkro2x5)"
+    ]
+  }
+}

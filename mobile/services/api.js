@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 
@@ -30,10 +30,23 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Response interceptor: handle 401
+// Response interceptor: handle 401 & network error
+let offlineAlertShown = false;
 api.interceptors.response.use(
-  (response) => response,
+  (response) => { offlineAlertShown = false; return response; },
   async (error) => {
+    if (!error.response) {
+      // Network error / no internet
+      if (!offlineAlertShown) {
+        offlineAlertShown = true;
+        Alert.alert(
+          '🔌 Tidak Ada Koneksi',
+          'Pastikan perangkat Anda terhubung ke internet, lalu coba lagi.',
+          [{ text: 'OK', onPress: () => { offlineAlertShown = false; } }]
+        );
+      }
+      return Promise.reject(error);
+    }
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
       if (!url.includes('/api/auth/me') && !url.includes('/api/auth/login')) {
@@ -67,5 +80,21 @@ export const getRankingIndividu = (periode = 'semua') => api.get(`/api/ranking/i
 export const getRankingWilayah = () => api.get('/api/ranking/wilayah');
 export const getRankingSaya = () => api.get('/api/ranking/saya');
 export const getGapAnalisis = () => api.get('/api/ranking/gap/analisis');
+
+// Guru
+export const getGuruSoal = () => api.get('/api/guru/soal');
+export const getGuruModul = () => api.get('/api/guru/modul');
+export const createSoal = (data) => api.post('/api/guru/soal', data);
+export const updateSoal = (id, data) => api.put(`/api/guru/soal/${id}`, data);
+export const deleteSoal = (id) => api.delete(`/api/guru/soal/${id}`);
+export const getGuruGap = () => api.get('/api/guru/gap');
+
+// Admin
+export const getAdminUsers = () => api.get('/api/admin/users');
+export const getAdminSekolah = () => api.get('/api/admin/sekolah');
+export const getAdminStats = () => api.get('/api/admin/stats');
+export const createUser = (data) => api.post('/api/admin/users', data);
+export const resetUserPassword = (id, password) => api.put(`/api/admin/users/${id}/reset-password`, { password });
+export const deleteUser = (id) => api.delete(`/api/admin/users/${id}`);
 
 export default api;

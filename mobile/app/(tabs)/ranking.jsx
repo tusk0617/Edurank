@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  FlatList, ActivityIndicator, RefreshControl, Alert,
+  FlatList, ActivityIndicator, RefreshControl, Alert, Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,7 +70,7 @@ export default function RankingScreen() {
     }
   };
 
-  const isGuruAdvisor = ['guru', 'advisor'].includes(user?.role);
+  const isGuruAdvisor = user?.role === 'guru';
 
   const maxWilayah = Math.max(...(data.wilayah.map(w => w.rata_poin) || [1]));
 
@@ -319,8 +319,41 @@ function GapAnalisisView({ data }) {
         </>
       )}
 
-      <TouchableOpacity style={styles.exportBtn} onPress={() => Alert.alert('Export', 'Laporan berhasil diexport (simulasi)')}>
-        <Ionicons name="download-outline" size={18} color="#fff" />
+      <TouchableOpacity
+        style={styles.exportBtn}
+        onPress={() => {
+          const lines = ['=== LAPORAN GAP ANALISIS EDURANK ===', ''];
+          if (data.summary?.sekolah_terbaik) {
+            lines.push(`Sekolah Terbaik : ${data.summary.sekolah_terbaik.nama} (${data.summary.sekolah_terbaik.avg?.toFixed(0)})`);
+            lines.push(`Perlu Perhatian : ${data.summary.sekolah_terlemah?.nama} (${data.summary.sekolah_terlemah?.avg?.toFixed(0)})`);
+            lines.push('');
+          }
+          if (data.siswa_berisiko?.length > 0) {
+            lines.push('--- Siswa Berisiko (Rata Skor < 60) ---');
+            data.siswa_berisiko.forEach(s => {
+              lines.push(`${s.nama} | ${s.nama_sekolah} | Skor: ${parseFloat(s.rata_skor).toFixed(0)} | Lemah: ${s.mapel_lemah}`);
+            });
+            lines.push('');
+          }
+          const mapelList = [...new Set(data.per_sekolah?.map(x => x.mapel) || [])];
+          const sekolahList = [...new Set(data.per_sekolah?.map(x => x.nama_sekolah) || [])];
+          if (mapelList.length > 0) {
+            lines.push('--- Rata Skor per Mapel & Sekolah ---');
+            mapelList.forEach(mapel => {
+              lines.push(`[${mapel}]`);
+              sekolahList.forEach(skl => {
+                const item = data.per_sekolah.find(x => x.nama_sekolah === skl && x.mapel === mapel);
+                const skor = item ? parseFloat(item.rata_skor).toFixed(0) : '0';
+                lines.push(`  ${skl}: ${skor}`);
+              });
+            });
+          }
+          lines.push('');
+          lines.push(`Diekspor pada: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`);
+          Share.share({ message: lines.join('\n'), title: 'Laporan Gap Analisis EduRank' }).catch(() => {});
+        }}
+      >
+        <Ionicons name="share-social-outline" size={18} color="#fff" />
         <Text style={styles.exportText}>Export Laporan</Text>
       </TouchableOpacity>
     </View>

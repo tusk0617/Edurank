@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FrontSchooler - Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #378ADD;
+    --secondary: #639922;
+    --danger: #E24B4A;
+    --warning: #EF9F27;
+    --bg: #F8F9FA;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --lightblue: #EBF4FF;
+  }
+  body { background: #1a1a2e; display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px; }
+  h1 { color: #fff; font-size: 28px; margin-bottom: 8px; font-weight: 800; }
+  .subtitle { color: #aaa; margin-bottom: 30px; font-size: 14px; }
+
+  .screen-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
+  .screen-nav button {
+    padding: 8px 16px; border-radius: 20px; border: 2px solid #444;
+    background: #2a2a3e; color: #aaa; cursor: pointer; font-size: 13px; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .screen-nav button.active, .screen-nav button:hover { border-color: var(--primary); background: var(--primary); color: #fff; }
+
+  .phone-frame {
+    width: 390px; min-height: 844px; background: var(--bg);
+    border-radius: 44px; overflow: hidden; position: relative;
+    box-shadow: 0 0 0 10px #111, 0 0 0 12px #333, 0 40px 80px rgba(0,0,0,0.5);
+  }
+  .phone-notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 32px; background: #111; border-radius: 0 0 20px 20px; z-index: 99;
+  }
+  .phone-screen { padding-top: 44px; height: 844px; background: var(--bg); display: none; flex-direction: column; overflow: hidden; }
+  .phone-screen.active { display: flex; }
+
+  .card { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
+  .btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; font-size: 15px; font-weight: 700; width: 100%; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+  .progress-track { background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; }
+
+  .bottom-tabs {
+    background: var(--card);
+    border-top: 1px solid var(--border); display: flex;
+    padding: 8px 0 12px; flex-shrink: 0;
+  }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+  .tab-icon { font-size: 20px; }
+  .tab-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+
+  .scroll-content { padding: 16px; overflow-y: auto; flex: 1; }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--card); border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat-value { font-size: 22px; font-weight: 800; color: var(--text); margin-top: 6px; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .avatar { border-radius: 99px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; }
+  .avatar-sm { width: 36px; height: 36px; font-size: 12px; }
+  .avatar-md { width: 46px; height: 46px; font-size: 16px; }
+  .avatar-lg { width: 90px; height: 90px; font-size: 32px; }
+
+  .input-group { margin-bottom: 14px; }
+  .input-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: block; }
+  .input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; color: var(--text); background: #FAFAFA; outline: none; }
+
+  .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; padding: 16px 24px; }
+  .podium-item { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .podium-base { width: 100%; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; border-width: 2px; border-style: solid; }
+  .podium-rank { font-size: 20px; font-weight: 800; }
+
+  .option-btn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--card); margin-bottom: 10px; cursor: pointer;
+  }
+  .option-btn.selected { border-color: var(--primary); background: var(--lightblue); }
+  .option-circle {
+    width: 32px; height: 32px; border-radius: 16px;
+    border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .option-btn.selected .option-circle { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .heatmap-cell { width: 80px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 2px; color: #fff; font-weight: 700; font-size: 13px; }
+  @keyframes countUp { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+  .score-anim { animation: countUp 0.8s ease-out; }
+  .bar-chart-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .bar-label { font-size: 11px; color: var(--muted); width: 70px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 20px; background: var(--border); border-radius: 10px; overflow: hidden; }
+  .bar-fill { height: 20px; border-radius: 10px; background: var(--primary); }
+  .bar-value { font-size: 12px; font-weight: 700; color: var(--primary); width: 30px; text-align: right; }
+</style>
+</head>
+<body>
+
+<h1>🎓 FrontSchooler</h1>
+<p class="subtitle">Platform Kompetisi Akademik Antar Sekolah — Preview UI</p>
+
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('dashboard')">Dashboard</button>
+  <button onclick="showScreen('modul')">Modul</button>
+  <button onclick="showScreen('assessment')">Ujian</button>
+  <button onclick="showScreen('soal')">Pengerjaan Soal</button>
+  <button onclick="showScreen('hasil')">Hasil Ujian</button>
+  <button onclick="showScreen('ranking')">Ranking</button>
+  <button onclick="showScreen('gap')">Gap Analysis</button>
+  <button onclick="showScreen('profil')">Profil</button>
+</div>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+
+  <!-- ============ LOGIN ============ -->
+  <div class="phone-screen active" id="screen-login">
+    <div style="padding: 40px 24px 24px; background: var(--bg); flex: 1; display: flex; flex-direction: column; justify-content: center; overflow-y: auto;">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <div style="width: 80px; height: 80px; border-radius: 40px; background: var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 8px 24px rgba(55,138,221,0.35);">
+          <span style="font-size: 36px;">🎓</span>
+        </div>
+        <div style="font-size: 32px; font-weight: 800; color: var(--primary); letter-spacing: 0.5px;">FrontSchooler</div>
+        <div style="font-size: 15px; color: var(--text); font-weight: 500; margin-top: 4px;">Platform Kompetisi Akademik</div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Antar Sekolah Se-Jakarta</div>
+      </div>
+      <div class="card">
+        <div class="input-group">
+          <label class="input-label">Email</label>
+          <input class="input" type="email" placeholder="contoh@email.com" value="siswa1@test.com">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Password</label>
+          <input class="input" type="password" value="password123">
+        </div>
+        <button class="btn btn-primary" style="margin-top: 8px; box-shadow: 0 4px 12px rgba(55,138,221,0.3);" onclick="showScreen('dashboard')">Masuk</button>
+        <div style="margin-top: 16px; padding: 12px; background: #F0F7FF; border-radius: 8px; border-left: 3px solid var(--primary);">
+          <div style="font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">Akun Demo:</div>
+          <div style="font-size: 12px; color: var(--muted);">Siswa: siswa1@test.com</div>
+          <div style="font-size: 12px; color: var(--muted);">Guru: guru1@test.com</div>
+          <div style="font-size: 12px; color: var(--muted);">Password: password123</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DASHBOARD ============ -->
+  <div class="phone-screen" id="screen-dashboard">
+    <div class="scroll-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px;">
+        <div>
+          <div style="font-size: 14px; color: var(--muted);">Selamat Pagi,</div>
+          <div style="font-size: 22px; font-weight: 700; color: var(--text);">Andi 👋</div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">SMAN 1 Jakarta Selatan</div>
+        </div>
+        <div class="avatar avatar-md" style="background: var(--primary);">AP</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div>⭐</div><div class="stat-value">524</div><div class="stat-label">Total XP</div></div>
+        <div class="stat-card"><div>🏆</div><div class="stat-value" style="color: var(--primary);">#3</div><div class="stat-label">Peringkat</div></div>
+        <div class="stat-card"><div>✅</div><div class="stat-value" style="color: var(--secondary);">6</div><div class="stat-label">Modul Selesai</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">📚 Modul Aktif</div>
+        <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;">
+          <div style="width: 4px; background: var(--primary); border-radius: 2px; align-self: stretch; min-height: 40px;"></div>
+          <div style="flex: 1;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">Trigonometri</div>
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Matematika</div>
+            <div class="progress-track" style="height: 6px;"><div class="progress-fill" style="width: 60%; background: var(--primary);"></div></div>
+            <div style="font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px;">60%</div>
+          </div>
+        </div>
+        <button class="btn" style="background: var(--lightblue); color: var(--primary); font-size: 14px;" onclick="showScreen('modul')">Lanjutkan Belajar →</button>
+      </div>
+      <div class="card">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">📝 Ujian Mendatang</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border);">
+          <div style="width: 8px; height: 8px; border-radius: 4px; background: #378ADD; flex-shrink: 0;"></div>
+          <div style="flex: 1;"><div style="font-size: 13px; font-weight: 600;">Ujian Fungsi dan Grafik</div><div style="font-size: 12px; color: var(--muted);">📅 15 Jun 2026</div></div><span>›</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border);">
+          <div style="width: 8px; height: 8px; border-radius: 4px; background: #639922; flex-shrink: 0;"></div>
+          <div style="flex: 1;"><div style="font-size: 13px; font-weight: 600;">Ujian Teks Narasi</div><div style="font-size: 12px; color: var(--danger);">⏰ 5 jam lagi</div></div><span>›</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">🏅 Badge Diraih</div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div style="background: rgba(239,159,39,0.15); padding: 10px 14px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 22px;">⭐</div>
+            <div style="font-size: 10px; font-weight: 600; color: var(--warning); margin-top: 4px;">Pemula</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab-item" onclick="showScreen('dashboard')"><div class="tab-icon">🏠</div><div class="tab-label" style="color:var(--primary)">Home</div></div>
+      <div class="tab-item" onclick="showScreen('modul')"><div class="tab-icon">📚</div><div class="tab-label">Modul</div></div>
+      <div class="tab-item" onclick="showScreen('assessment')"><div class="tab-icon">✏️</div><div class="tab-label">Ujian</div></div>
+      <div class="tab-item" onclick="showScreen('ranking')"><div class="tab-icon">🏆</div><div class="tab-label">Ranking</div></div>
+      <div class="tab-item" onclick="showScreen('profil')"><div class="tab-icon">👤</div><div class="tab-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ============ MODUL ============ -->
+  <div class="phone-screen" id="screen-modul">
+    <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+      <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 20px; font-weight: 700;">Modul Pembelajaran</div>
+        <div style="background: rgba(239,159,39,0.15); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 4px;">
+          <span style="font-size: 14px;">⭐</span><span style="font-size: 14px; font-weight: 700; color: var(--warning);">524 XP</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; padding: 0 16px 12px; overflow-x: auto;">
+        <button style="padding: 8px 16px; border-radius: 20px; border: none; background: var(--primary); color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;">Matematika</button>
+        <button style="padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;">Bahasa Indonesia</button>
+        <button style="padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;">Bahasa Inggris</button>
+      </div>
+      <div class="scroll-content" style="padding-top: 4px;">
+        <div class="card" style="padding: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px; flex: 1;">
+              <div style="width: 36px; height: 36px; background: rgba(55,138,221,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--primary);">1</div>
+              <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Aljabar Dasar</div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <span style="background: var(--secondary); color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;">Mudah</span>
+                  <span style="font-size: 11px; color: var(--muted);">⏱ 30m</span><span style="font-size: 11px; color: var(--muted);">⭐ 50 XP</span>
+                </div>
+              </div>
+            </div>
+            <span style="font-size: 22px;">✅</span>
+          </div>
+          <div class="progress-track" style="height: 5px;"><div class="progress-fill" style="width: 100%; background: var(--secondary);"></div></div>
+        </div>
+        <div class="card" style="padding: 14px; border: 1.5px solid var(--primary);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px; flex: 1;">
+              <div style="width: 36px; height: 36px; background: rgba(55,138,221,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--primary);">3</div>
+              <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Trigonometri</div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <span style="background: var(--danger); color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;">Sulit</span>
+                  <span style="font-size: 11px; color: var(--muted);">⏱ 60m</span><span style="font-size: 11px; color: var(--muted);">⭐ 120 XP</span>
+                </div>
+              </div>
+            </div>
+            <span style="font-size: 22px; color: var(--primary);">▶️</span>
+          </div>
+          <div class="progress-track" style="height: 5px;"><div class="progress-fill" style="width: 60%; background: var(--primary);"></div></div>
+          <div style="font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px;">60%</div>
+        </div>
+        <div class="card" style="padding: 14px; opacity: 0.45;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: flex-start; gap: 12px; flex: 1;">
+              <div style="width: 36px; height: 36px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--muted);">4</div>
+              <div><div style="font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 4px;">Statistika Dasar</div>
+                <div style="display: flex; gap: 6px;"><span style="background: var(--warning); color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;">Menengah</span><span style="font-size: 11px; color: var(--muted);">⏱ 45m</span></div>
+              </div>
+            </div>
+            <span style="font-size: 22px;">🔒</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab-item" onclick="showScreen('dashboard')"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tab-item" onclick="showScreen('modul')"><div class="tab-icon">📚</div><div class="tab-label" style="color:var(--primary)">Modul</div></div>
+      <div class="tab-item" onclick="showScreen('assessment')"><div class="tab-icon">✏️</div><div class="tab-label">Ujian</div></div>
+      <div class="tab-item" onclick="showScreen('ranking')"><div class="tab-icon">🏆</div><div class="tab-label">Ranking</div></div>
+      <div class="tab-item" onclick="showScreen('profil')"><div class="tab-icon">👤</div><div class="tab-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ============ ASSESSMENT ============ -->
+  <div class="phone-screen" id="screen-assessment">
+    <div style="padding: 16px 16px 8px;">
+      <div style="font-size: 22px; font-weight: 700;">Ujian</div>
+      <div style="font-size: 13px; color: var(--muted);">10 assessment tersedia</div>
+    </div>
+    <div class="scroll-content" style="padding-top: 8px;">
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <div style="width: 10px; height: 10px; border-radius: 5px; background: #378ADD;"></div>
+          <div style="font-size: 12px; color: var(--muted); flex: 1;">Matematika</div>
+          <span style="background: rgba(99,153,34,0.15); color: var(--secondary); padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;">✓ Lulus</span>
+        </div>
+        <div style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">Ujian Aljabar Dasar</div>
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Modul Aljabar Dasar</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+          <span style="font-size: 12px; color: var(--muted);">⏱ 20 menit</span>
+          <span style="font-size: 12px; color: var(--muted);">⭐ Skor: 90</span>
+        </div>
+        <button class="btn" style="background: var(--border); color: var(--muted);">✓ Sudah Lulus</button>
+      </div>
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <div style="width: 10px; height: 10px; border-radius: 5px; background: #EF9F27;"></div>
+          <div style="font-size: 12px; color: var(--muted); flex: 1;">Bahasa Inggris</div>
+          <span style="background: rgba(55,138,221,0.15); color: var(--primary); padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;">▶ Tersedia</span>
+        </div>
+        <div style="font-size: 16px; font-weight: 700; margin-bottom: 2px;">Ujian Simple Present & Past</div>
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Modul Simple Present & Past</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+          <span style="font-size: 12px; color: var(--muted);">⏱ 20 menit</span>
+          <span style="font-size: 12px; color: var(--muted);">🔄 2 percobaan tersisa</span>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('soal')">▶ Mulai Ujian</button>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab-item" onclick="showScreen('dashboard')"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tab-item" onclick="showScreen('modul')"><div class="tab-icon">📚</div><div class="tab-label">Modul</div></div>
+      <div class="tab-item" onclick="showScreen('assessment')"><div class="tab-icon">✏️</div><div class="tab-label" style="color:var(--primary)">Ujian</div></div>
+      <div class="tab-item" onclick="showScreen('ranking')"><div class="tab-icon">🏆</div><div class="tab-label">Ranking</div></div>
+      <div class="tab-item" onclick="showScreen('profil')"><div class="tab-icon">👤</div><div class="tab-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ============ SOAL ============ -->
+  <div class="phone-screen" id="screen-soal">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--card); border-bottom: 1px solid var(--border);">
+      <span style="font-size: 22px; cursor: pointer;" onclick="showScreen('assessment')">✕</span>
+      <div style="flex: 1;">
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Soal 3 / 5</div>
+        <div class="progress-track" style="height: 4px;"><div class="progress-fill" style="width: 60%;"></div></div>
+      </div>
+      <div style="background: var(--primary); padding: 6px 12px; border-radius: 8px; color: #fff; font-weight: 700; font-size: 14px;">05:32</div>
+    </div>
+    <div style="padding: 20px; flex: 1; overflow-y: auto;">
+      <div style="font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.5; margin-bottom: 20px;">Identitas trigonometri sin²θ + cos²θ = ...</div>
+      <div class="option-btn" onclick="selectOption(this)"><div class="option-circle">A</div><span style="font-size: 14px;">0</span></div>
+      <div class="option-btn selected" onclick="selectOption(this)"><div class="option-circle" style="background: var(--primary); color: #fff; border-color: var(--primary);">B</div><span style="font-size: 14px; color: var(--primary); font-weight: 600;">1</span></div>
+      <div class="option-btn" onclick="selectOption(this)"><div class="option-circle">C</div><span style="font-size: 14px;">2</span></div>
+      <div class="option-btn" onclick="selectOption(this)"><div class="option-circle">D</div><span style="font-size: 14px;">tan²θ</span></div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--card); border-top: 1px solid var(--border); flex-shrink: 0;">
+      <button style="background: none; border: none; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer;">‹ Sebelumnya</button>
+      <button class="btn btn-primary" style="width: auto; padding: 10px 20px;" onclick="showScreen('hasil')">Selanjutnya ›</button>
+    </div>
+  </div>
+
+  <!-- ============ HASIL ============ -->
+  <div class="phone-screen" id="screen-hasil">
+    <div style="padding: 32px 24px; text-align: center; overflow-y: auto; flex: 1;">
+      <div style="font-size: 64px; margin-bottom: 8px;">✅</div>
+      <div class="score-anim" style="font-size: 80px; font-weight: 800; color: var(--secondary); line-height: 1;">85</div>
+      <div style="font-size: 24px; font-weight: 700; color: var(--secondary); margin-bottom: 20px;">🎉 LULUS!</div>
+      <div class="card" style="text-align: left; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+          <span style="color: var(--muted);">Skor Mentah</span><span style="font-weight: 600;">85</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+          <span style="color: var(--muted);">Poin Didapat</span><span style="font-weight: 700; color: var(--primary);">+85 poin</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+          <span style="color: var(--muted);">Ranking Kamu</span><span style="font-weight: 600;">#3</span>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="margin-bottom: 10px;">📋 Lihat Pembahasan</button>
+      <button class="btn btn-primary" onclick="showScreen('dashboard')">🏠 Kembali ke Beranda</button>
+    </div>
+  </div>
+
+  <!-- ============ RANKING ============ -->
+  <div class="phone-screen" id="screen-ranking">
+    <div style="padding: 16px 16px 8px;">
+      <div style="font-size: 22px; font-weight: 700; margin-bottom: 10px;">Leaderboard</div>
+      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <button style="padding: 6px 14px; border-radius: 20px; background: var(--primary); border: none; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;">Semua</button>
+        <button style="padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;">Bulan</button>
+        <button style="padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;">Minggu</button>
+      </div>
+      <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+        <button style="padding: 6px 14px; border-radius: 20px; background: var(--primary); border: none; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;">Individu</button>
+        <button style="padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;">Sekolah</button>
+        <button style="padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;">Wilayah</button>
+      </div>
+    </div>
+    <div class="scroll-content" style="padding-top: 4px;">
+      <div class="podium">
+        <div class="podium-item">
+          <div class="avatar avatar-sm" style="background: #9CA3AF; width: 44px; height: 44px; font-size: 14px;">BS</div>
+          <div style="font-size: 11px; font-weight: 600; margin: 4px 0 2px; text-align: center;">Budi</div>
+          <div style="font-size: 11px; color: var(--muted);">750</div>
+          <div class="podium-base" style="height: 90px; background: rgba(156,163,175,0.2); border-color: #9CA3AF;"><div class="podium-rank" style="color: #9CA3AF;">#2</div></div>
+        </div>
+        <div class="podium-item">
+          <div style="font-size: 18px; margin-bottom: 2px;">👑</div>
+          <div class="avatar avatar-sm" style="background: #EF9F27; width: 52px; height: 52px; font-size: 16px;">CD</div>
+          <div style="font-size: 11px; font-weight: 600; margin: 4px 0 2px; text-align: center;">Citra</div>
+          <div style="font-size: 11px; color: var(--muted);">868</div>
+          <div class="podium-base" style="height: 110px; background: rgba(239,159,39,0.2); border-color: #EF9F27;"><div class="podium-rank" style="color: #EF9F27;">#1</div></div>
+        </div>
+        <div class="podium-item">
+          <div class="avatar avatar-sm" style="background: #CD7C3E; width: 40px; height: 40px; font-size: 13px;">AP</div>
+          <div style="font-size: 11px; font-weight: 600; margin: 4px 0 2px; text-align: center;">Andi</div>
+          <div style="font-size: 11px; color: var(--muted);">524</div>
+          <div class="podium-base" style="height: 75px; background: rgba(205,124,62,0.2); border-color: #CD7C3E;"><div class="podium-rank" style="color: #CD7C3E;">#3</div></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; background: var(--card); padding: 12px; border-radius: 10px;">
+          <span style="font-size: 14px; font-weight: 700; color: var(--muted); width: 24px; text-align: center;">4</span>
+          <div class="avatar avatar-sm" style="background: #E24B4A;">DR</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Dian Rahayu</div><div style="font-size: 11px; color: var(--muted);">SMAN 2 Jakarta Utara</div></div>
+          <span style="font-size: 14px; font-weight: 700; color: var(--primary);">217</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; background: var(--lightblue); margin-top: 12px; padding: 12px; border-radius: 10px;">
+        <span style="font-size: 14px;">📍</span>
+        <span style="font-size: 13px; font-weight: 600; color: var(--primary);">Posisi kamu: #3 (524 poin)</span>
+      </div>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab-item" onclick="showScreen('dashboard')"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tab-item" onclick="showScreen('modul')"><div class="tab-icon">📚</div><div class="tab-label">Modul</div></div>
+      <div class="tab-item" onclick="showScreen('assessment')"><div class="tab-icon">✏️</div><div class="tab-label">Ujian</div></div>
+      <div class="tab-item" onclick="showScreen('ranking')"><div class="tab-icon">🏆</div><div class="tab-label" style="color:var(--primary)">Ranking</div></div>
+      <div class="tab-item" onclick="showScreen('profil')"><div class="tab-icon">👤</div><div class="tab-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ============ GAP ANALYSIS ============ -->
+  <div class="phone-screen" id="screen-gap">
+    <div style="padding: 16px 16px 8px;">
+      <div style="font-size: 20px; font-weight: 700;">Gap Analysis</div>
+      <div style="font-size: 13px; color: var(--muted);">Performa antar sekolah</div>
+    </div>
+    <div class="scroll-content" style="padding-top: 8px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <div class="card" style="border-top: 3px solid var(--secondary);"><div style="font-size: 11px; color: var(--muted);">🏆 Terbaik</div><div style="font-size: 13px; font-weight: 700; margin-top: 4px;">SMAN 2 Jkt Utara</div><div style="font-size: 12px; color: var(--muted);">868 avg</div></div>
+        <div class="card" style="border-top: 3px solid var(--danger);"><div style="font-size: 11px; color: var(--muted);">⚠ Perlu Perhatian</div><div style="font-size: 13px; font-weight: 700; margin-top: 4px;">SMAN 3 Jkt Pusat</div><div style="font-size: 12px; color: var(--muted);">10 avg</div></div>
+      </div>
+      <div class="card" style="margin-bottom: 12px;">
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px;">Rata Skor per Mapel</div>
+        <div style="font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px;">Matematika</div>
+        <div class="bar-chart-row"><div class="bar-label">SMAN 1</div><div class="bar-track"><div class="bar-fill" style="width: 85%;"></div></div><div class="bar-value">85</div></div>
+        <div class="bar-chart-row"><div class="bar-label">SMAN 2</div><div class="bar-track"><div class="bar-fill" style="width: 70%; background: var(--secondary);"></div></div><div class="bar-value" style="color: var(--secondary);">70</div></div>
+        <div class="bar-chart-row"><div class="bar-label">SMAN 3</div><div class="bar-track"><div class="bar-fill" style="width: 45%; background: var(--danger);"></div></div><div class="bar-value" style="color: var(--danger);">45</div></div>
+      </div>
+      <button class="btn btn-primary" style="margin-bottom: 16px;">📥 Export Laporan</button>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab-item" onclick="showScreen('dashboard')"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tab-item" onclick="showScreen('modul')"><div class="tab-icon">📚</div><div class="tab-label">Modul</div></div>
+      <div class="tab-item" onclick="showScreen('assessment')"><div class="tab-icon">✏️</div><div class="tab-label">Ujian</div></div>
+      <div class="tab-item" onclick="showScreen('ranking')"><div class="tab-icon">🏆</div><div class="tab-label" style="color:var(--primary)">Ranking</div></div>
+      <div class="tab-item" onclick="showScreen('profil')"><div class="tab-icon">👤</div><div class="tab-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ============ PROFIL ============ -->
+  <div class="phone-screen" id="screen-profil">
+    <div class="scroll-content">
+      <div style="text-align: center; padding: 8px 0 20px;">
+        <div class="avatar avatar-lg" style="background: var(--primary); margin: 0 auto 12px; box-shadow: 0 8px 24px rgba(55,138,221,0.3);">AP</div>
+        <div style="font-size: 22px; font-weight: 700; color: var(--text);">Andi Pratama</div>
+        <div style="display: inline-block; background: rgba(55,138,221,0.15); padding: 5px 14px; border-radius: 20px; margin: 6px 0;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--primary);">Siswa</span>
+        </div>
+        <div style="font-size: 14px; color: var(--muted); margin-top: 4px;">siswa1@test.com</div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">🏫 SMAN 1 Jakarta Selatan · Jakarta Selatan</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <div class="stat-card"><div>⭐</div><div class="stat-value">524</div><div class="stat-label">Total XP</div></div>
+        <div class="stat-card"><div>🏆</div><div class="stat-value" style="color:var(--primary)">#3</div><div class="stat-label">Ranking</div></div>
+        <div class="stat-card"><div>📚</div><div class="stat-value" style="color:var(--secondary)">6</div><div class="stat-label">Modul</div></div>
+      </div>
+      <div class="card" style="margin-bottom: 12px; padding: 0;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 14px; border-bottom: 1px solid var(--border);">
+          <div style="width: 36px; height: 36px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center;">👤</div>
+          <div><div style="font-size: 11px; color: var(--muted);">Nama Lengkap</div><div style="font-size: 14px; font-weight: 500;">Andi Pratama</div></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 14px; border-bottom: 1px solid var(--border);">
+          <div style="width: 36px; height: 36px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center;">✉️</div>
+          <div><div style="font-size: 11px; color: var(--muted);">Email</div><div style="font-size: 14px; font-weight: 500;">siswa1@test.com</div></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 14px;">
+          <div style="width: 36px; height: 36px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center;">🏫</div>
+          <div><div style="font-size: 11px; color: var(--muted);">Sekolah</div><div style="font-size: 14px; font-weight: 500;">SMAN 1 Jakarta Selatan</div></div>
+        </div>
+      </div>
+      <button class="btn" style="background: rgba(226,75,74,0.1); border: 1.5px solid rgba(226,75,74,0.4); color: var(--danger); margin-bottom: 24px;" onclick="showScreen('login')">🚪 Keluar</button>
+    </div>
+    <div class="bottom-tabs">
+      <div class="tab-item" onclick="showScreen('dashboard')"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+      <div class="tab-item" onclick="showScreen('modul')"><div class="tab-icon">📚</div><div class="tab-label">Modul</div></div>
+      <div class="tab-item" onclick="showScreen('assessment')"><div class="tab-icon">✏️</div><div class="tab-label">Ujian</div></div>
+      <div class="tab-item" onclick="showScreen('ranking')"><div class="tab-icon">🏆</div><div class="tab-label">Ranking</div></div>
+      <div class="tab-item" onclick="showScreen('profil')"><div class="tab-icon">👤</div><div class="tab-label" style="color:var(--primary)">Profil</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.phone-screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.screen-nav button').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name) ||
+        (name === 'soal' && b.textContent === 'Pengerjaan Soal') ||
+        (name === 'hasil' && b.textContent === 'Hasil Ujian') ||
+        (name === 'gap' && b.textContent === 'Gap Analysis')) {
+      b.classList.add('active');
+    }
+  });
+}
+function selectOption(el) {
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.querySelector('.option-circle').style.background = '';
+    b.querySelector('.option-circle').style.borderColor = '';
+    b.querySelector('.option-circle').style.color = '';
+  });
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>
