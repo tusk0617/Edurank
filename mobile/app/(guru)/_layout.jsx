@@ -31,7 +31,7 @@ export default function GuruLayout() {
         }}
       />
       <Tabs.Screen
-        name="soal"
+        name="soal/index"
         options={{
           title: 'Kelola Soal',
           tabBarIcon: ({ color, size }) => <Ionicons name="document-text" size={size} color={color} />,
