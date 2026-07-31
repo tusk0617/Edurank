@@ -195,23 +195,23 @@ INSERT INTO badge (id, nama, deskripsi, ikon_nama, warna_hex) VALUES
 -- Modul Aljabar (mapel_id=1)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
 (1, 1, 'Persamaan Linear & Pertidaksamaan', 'Pelajari cara menyusun dan menyelesaikan persamaan linear satu variabel serta pertidaksamaan, termasuk sistem persamaan linear dua variabel.', 1, 1, 30, 50),
-(2, 1, 'Fungsi, Komposisi & Invers',        'Memahami konsep fungsi dan notasi f(x), komposisi fungsi (fog)(x), fungsi invers f^(-1)(x), serta representasi grafik dan transformasinya.',         2, 2, 45, 80);
+(2, 1, 'Fungsi, Komposisi & Invers',        'Memahami konsep fungsi dan notasi f(x), komposisi fungsi (fog)(x), fungsi invers f^(-1)(x), serta representasi grafik dan transformasinya.',         2, 2, 45, 100);
 
 -- Modul Trigonometri (mapel_id=2)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(5, 2, 'Rasio & Identitas Trigonometri', 'Kuasai sin, cos, tan pada segitiga siku-siku, sudut-sudut istimewa, identitas Pythagoras, serta aturan sinus dan cosinus.', 2, 1, 50, 90);
+(5, 2, 'Rasio & Identitas Trigonometri', 'Kuasai sin, cos, tan pada segitiga siku-siku, sudut-sudut istimewa, identitas Pythagoras, serta aturan sinus dan cosinus.', 2, 1, 50, 100);
 
 -- Modul Statistika (mapel_id=3)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(7, 3, 'Statistika Deskriptif', 'Pahami cara meringkas dan menganalisis data: mean, median, modus, jangkauan, ragam, simpangan baku, serta penyajian histogram dan diagram lingkaran.', 2, 1, 40, 70);
+(7, 3, 'Statistika Deskriptif', 'Pahami cara meringkas dan menganalisis data: mean, median, modus, jangkauan, ragam, simpangan baku, serta penyajian histogram dan diagram lingkaran.', 2, 1, 40, 100);
 
 -- Modul Geometri (mapel_id=4)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(9, 4, 'Vektor', 'Memahami operasi vektor 2D dan 3D, panjang vektor, dot product, cross product, serta penerapannya dalam geometri dan fisika.', 3, 1, 55, 110);
+(9, 4, 'Vektor', 'Memahami operasi vektor 2D dan 3D, panjang vektor, dot product, cross product, serta penerapannya dalam geometri dan fisika.', 3, 1, 55, 150);
 
 -- Modul Kalkulus (mapel_id=5)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
-(10, 5, 'Limit, Turunan & Integral', 'Pengantar kalkulus SMA: konsep limit, kekontinuan, aturan turunan (diferensiasi), anti-turunan, dan integral dasar — mengikuti jalur Kalkulus AB.', 3, 1, 60, 120);
+(10, 5, 'Limit, Turunan & Integral', 'Pengantar kalkulus SMA: konsep limit, kekontinuan, aturan turunan (diferensiasi), anti-turunan, dan integral dasar — mengikuti jalur Kalkulus AB.', 3, 1, 60, 150);
 
 -- Soal Modul 1: Persamaan Linear & Pertidaksamaan
 INSERT INTO soal (modul_id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES
