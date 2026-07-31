@@ -149,7 +149,7 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
     const statusHasil = lulus ? 'lulus' : (percobaan < assessment.max_retake ? 'remedial' : 'tidak_lulus');
     const levelXpMap = { 1: 50, 2: 100, 3: 150 };
     const levelXp = levelXpMap[assessment.modul_level] || 50;
-    const poinDidapat = Math.round((skorAkhir / 100) * levelXp * 2);
+    const poinDidapat = Math.round((skorAkhir / 100) * levelXp * 5);
 
     // Update sesi
     await conn.query(
