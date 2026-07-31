@@ -195,7 +195,7 @@ INSERT INTO badge (id, nama, deskripsi, ikon_nama, warna_hex) VALUES
 -- Modul Aljabar (mapel_id=1)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
 (1, 1, 'Persamaan Linear & Pertidaksamaan', 'Pelajari cara menyusun dan menyelesaikan persamaan linear satu variabel serta pertidaksamaan, termasuk sistem persamaan linear dua variabel.', 1, 1, 30, 50),
-(2, 1, 'Fungsi, Komposisi & Invers',        'Memahami konsep fungsi dan notasi f(x), komposisi fungsi (f∘g), fungsi invers f⁻¹(x), serta representasi grafik dan transformasinya.',         2, 2, 45, 80);
+(2, 1, 'Fungsi, Komposisi & Invers',        'Memahami konsep fungsi dan notasi f(x), komposisi fungsi (fog)(x), fungsi invers f^(-1)(x), serta representasi grafik dan transformasinya.',         2, 2, 45, 80);
 
 -- Modul Trigonometri (mapel_id=2)
 INSERT INTO modul (id, mapel_id, judul, deskripsi, level, urutan, estimasi_menit, xp_reward) VALUES
