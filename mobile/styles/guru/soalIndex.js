@@ -14,7 +14,7 @@ export default StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 5, borderRadius: 14,
     borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.card,
   },
-  tabActive: { backgroundColor: Colors.secondary, borderColor: Colors.secondary },
+  tabActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   tabText: { fontSize: 11, fontWeight: '600', color: Colors.muted },
   tabTextActive: { color: '#fff' },
 
@@ -27,10 +27,10 @@ export default StyleSheet.create({
   modulLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   modulNumBadge: {
     width: 36, height: 36, borderRadius: 8,
-    backgroundColor: Colors.secondary + '20',
+    backgroundColor: Colors.primary + '20',
     justifyContent: 'center', alignItems: 'center',
   },
-  modulNum: { fontSize: 16, fontWeight: '700', color: Colors.secondary },
+  modulNum: { fontSize: 16, fontWeight: '700', color: Colors.primary },
   modulJudul: { fontSize: 14, fontWeight: '600', color: Colors.text, marginBottom: 2 },
   mapelLabel: { fontSize: 12, color: Colors.muted },
   empty: { alignItems: 'center', paddingTop: 60 },
@@ -44,7 +44,7 @@ export default StyleSheet.create({
   },
   addBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Colors.secondary, borderRadius: 12, paddingVertical: 14,
+    backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 14,
   },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
@@ -70,9 +70,9 @@ export default StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
     borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card,
   },
-  chipActive: { borderColor: Colors.secondary, backgroundColor: Colors.secondary + '15' },
+  chipActive: { borderColor: Colors.primary, backgroundColor: Colors.primary + '15' },
   chipText: { fontSize: 13, color: Colors.muted, fontWeight: '600' },
-  chipTextActive: { color: Colors.secondary, fontWeight: '700' },
+  chipTextActive: { color: Colors.primary, fontWeight: '700' },
 
   // Tingkat kesulitan
   levelRow: { flexDirection: 'row', gap: 10 },
@@ -86,7 +86,7 @@ export default StyleSheet.create({
   // Submit button di modal
   submitBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Colors.secondary, borderRadius: 12, paddingVertical: 15,
+    backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 15,
   },
   submitBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

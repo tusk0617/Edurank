@@ -159,7 +159,7 @@ export default function GuruGap() {
                       activeOpacity={0.7}
                     >
                       <View style={styles.modulLeft}>
-                        <View style={[styles.mapelDot, { backgroundColor: item.warna_hex || Colors.secondary }]} />
+                        <View style={[styles.mapelDot, { backgroundColor: item.warna_hex || Colors.primary }]} />
                         <View style={{ flex: 1 }}>
                           <Text style={styles.modulJudul} numberOfLines={1}>{item.judul}</Text>
                           <Text style={styles.modulMapel}>{item.nama_mapel} · {item.total_soal} soal</Text>
@@ -269,12 +269,12 @@ export default function GuruGap() {
               <Text style={styles.modalTitle} numberOfLines={1}>{selectedModul?.judul}</Text>
               <Text style={styles.modalSubtitle}>{selectedModul?.nama_mapel}</Text>
             </View>
-            <View style={[styles.mapelDot, { backgroundColor: selectedModul?.warna_hex || Colors.secondary, width: 14, height: 14, borderRadius: 7 }]} />
+            <View style={[styles.mapelDot, { backgroundColor: selectedModul?.warna_hex || Colors.primary, width: 14, height: 14, borderRadius: 7 }]} />
           </View>
 
           {loadingSoal ? (
             <View style={styles.center}>
-              <ActivityIndicator size="large" color={Colors.secondary} />
+              <ActivityIndicator size="large" color={Colors.primary} />
             </View>
           ) : modulSoal.length === 0 ? (
             <View style={styles.center}>
@@ -329,9 +329,9 @@ const styles = StyleSheet.create({
   // Tab switcher
   tabContainer: { flexDirection: 'row', backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border },
   tab: { flex: 1, paddingVertical: 13, alignItems: 'center' },
-  tabActive: { borderBottomWidth: 2, borderBottomColor: Colors.secondary },
+  tabActive: { borderBottomWidth: 2, borderBottomColor: Colors.primary },
   tabText: { fontSize: 13, fontWeight: '600', color: Colors.muted },
-  tabTextActive: { color: Colors.secondary },
+  tabTextActive: { color: Colors.primary },
 
   // Analisis Soal
   container: { flex: 1, padding: 20 },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   // Analisis Murid
   filterRow: { flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
   filterBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card },
-  filterBtnActive: { backgroundColor: Colors.secondary, borderColor: Colors.secondary },
+  filterBtnActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   filterBtnDanger: { backgroundColor: Colors.danger, borderColor: Colors.danger },
   filterBtnText: { fontSize: 12, fontWeight: '600', color: Colors.muted },
   filterBtnTextActive: { color: '#fff' },

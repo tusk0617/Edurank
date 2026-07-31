@@ -31,10 +31,10 @@ export default StyleSheet.create({
   soalMeta: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 10 },
   soalNumBadge: {
     width: 28, height: 28, borderRadius: 7,
-    backgroundColor: Colors.secondary + '20',
+    backgroundColor: Colors.primary + '20',
     justifyContent: 'center', alignItems: 'center', marginTop: 1,
   },
-  soalNum: { fontSize: 13, fontWeight: '700', color: Colors.secondary },
+  soalNum: { fontSize: 13, fontWeight: '700', color: Colors.primary },
   soalText: { flex: 1, fontSize: 13, color: Colors.text, lineHeight: 18 },
 
   // Opsi jawaban
@@ -68,7 +68,7 @@ export default StyleSheet.create({
   },
   addBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Colors.secondary, borderRadius: 12, paddingVertical: 14,
+    backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 14,
   },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
@@ -79,7 +79,7 @@ export default StyleSheet.create({
     padding: 16, backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   modalTitle: { fontSize: 16, fontWeight: '700', color: Colors.text },
-  saveText: { fontSize: 15, fontWeight: '700', color: Colors.secondary },
+  saveText: { fontSize: 15, fontWeight: '700', color: Colors.primary },
   modalBody: { flex: 1, padding: 20 },
   fieldLabel: { fontSize: 13, fontWeight: '600', color: Colors.text, marginBottom: 6, marginTop: 12 },
   input: {

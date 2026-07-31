@@ -59,7 +59,7 @@ export default function KelolaSOalIndex() {
   const filtered = filterMapel ? modulList.filter(m => m.nama_mapel === filterMapel) : modulList;
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color={Colors.secondary} /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={Colors.primary} /></View>;
   }
 
   return (
@@ -68,7 +68,7 @@ export default function KelolaSOalIndex() {
       <View style={[styles.header, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
         <Text style={styles.headerTitle}>Kelola Soal</Text>
         <TouchableOpacity
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.secondary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 }}
           onPress={() => setModalVisible(true)}
           activeOpacity={0.8}
         >
@@ -94,7 +94,7 @@ export default function KelolaSOalIndex() {
         data={filtered}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={[styles.list, { paddingBottom: 24 }]}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.secondary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.primary} />}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="book-outline" size={48} color={Colors.border} />
@@ -131,8 +131,8 @@ export default function KelolaSOalIndex() {
             <Text style={styles.modalTitle}>Tambah Materi</Text>
             <TouchableOpacity onPress={handleSave} disabled={saving}>
               {saving
-                ? <ActivityIndicator size="small" color={Colors.secondary} />
-                : <Text style={{ fontSize: 15, fontWeight: '700', color: Colors.secondary }}>Simpan</Text>
+                ? <ActivityIndicator size="small" color={Colors.primary} />
+                : <Text style={{ fontSize: 15, fontWeight: '700', color: Colors.primary }}>Simpan</Text>
               }
             </TouchableOpacity>
           </View>
@@ -164,10 +164,10 @@ export default function KelolaSOalIndex() {
               {LEVEL_OPTIONS.map(lv => (
                 <TouchableOpacity
                   key={lv}
-                  style={[styles.levelBtn, form.level === lv && { borderColor: Colors.secondary, backgroundColor: Colors.secondary + '15' }]}
+                  style={[styles.levelBtn, form.level === lv && { borderColor: Colors.primary, backgroundColor: Colors.primary + '15' }]}
                   onPress={() => setForm(f => ({ ...f, level: lv }))}
                 >
-                  <Text style={[styles.levelBtnText, form.level === lv && { color: Colors.secondary, fontWeight: '700' }]}>{lv}</Text>
+                  <Text style={[styles.levelBtnText, form.level === lv && { color: Colors.primary, fontWeight: '700' }]}>{lv}</Text>
                 </TouchableOpacity>
               ))}
             </View>

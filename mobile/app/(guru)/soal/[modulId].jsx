@@ -111,7 +111,7 @@ export default function SoalDetail() {
   };
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color={Colors.secondary} /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={Colors.primary} /></View>;
   }
 
   return (
@@ -123,7 +123,7 @@ export default function SoalDetail() {
         </TouchableOpacity>
         <Text style={styles.pageTitle} numberOfLines={1}>{judul || 'Soal'}</Text>
         <TouchableOpacity
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: Colors.secondary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 9 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: Colors.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 9 }}
           onPress={openTambah}
           activeOpacity={0.8}
         >
@@ -137,7 +137,7 @@ export default function SoalDetail() {
         data={soalList}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.secondary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.primary} />}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="document-text-outline" size={48} color={Colors.border} />
@@ -186,7 +186,7 @@ export default function SoalDetail() {
             <Text style={styles.modalTitle}>{editId ? 'Edit Soal' : 'Tambah Soal'}</Text>
             <TouchableOpacity onPress={handleSave} disabled={saving}>
               {saving
-                ? <ActivityIndicator size="small" color={Colors.secondary} />
+                ? <ActivityIndicator size="small" color={Colors.primary} />
                 : <Text style={styles.saveText}>Simpan</Text>
               }
             </TouchableOpacity>

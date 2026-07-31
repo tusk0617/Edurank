@@ -9,7 +9,7 @@ export default function GuruLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.secondary,
+        tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.muted,
         tabBarStyle: {
           backgroundColor: Colors.card,

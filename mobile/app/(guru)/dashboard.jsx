@@ -43,7 +43,7 @@ export default function GuruDashboard() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={Colors.secondary} />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
@@ -52,7 +52,7 @@ export default function GuruDashboard() {
     <SafeAreaView style={styles.safe}>
       <ScrollView
         style={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.secondary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.primary} />}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -72,7 +72,7 @@ export default function GuruDashboard() {
         {/* Stats */}
         {ringkasan && (
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { borderLeftColor: Colors.secondary }]}>
+            <View style={[styles.statCard, { borderLeftColor: Colors.primary }]}>
               <Text style={styles.statNum}>{ringkasan.total_soal}</Text>
               <Text style={styles.statLabel}>Total Soal</Text>
             </View>
@@ -92,7 +92,7 @@ export default function GuruDashboard() {
 
         <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/soal')} activeOpacity={0.85}>
           <View style={[styles.menuIcon, { backgroundColor: '#EDF7ED' }]}>
-            <Ionicons name="document-text" size={28} color={Colors.secondary} />
+            <Ionicons name="document-text" size={28} color={Colors.primary} />
           </View>
           <View style={styles.menuInfo}>
             <Text style={styles.menuTitle}>Kelola Soal</Text>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 20, fontWeight: '800', color: Colors.text, marginTop: 2 },
   roleBadge: {
     marginTop: 6, alignSelf: 'flex-start',
-    backgroundColor: Colors.secondary, borderRadius: 6,
+    backgroundColor: Colors.primary, borderRadius: 6,
     paddingHorizontal: 8, paddingVertical: 2,
   },
   roleText: { fontSize: 10, fontWeight: '700', color: '#fff', letterSpacing: 1 },
