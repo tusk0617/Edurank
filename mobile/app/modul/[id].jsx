@@ -36,7 +36,7 @@ const TOPIK_MAP = {
     { n: 5, t: 'Grafik fungsi dan transformasi' },
   ],
   5: [
-    { n: 1, t: 'Definisi sin, cos, tan (SOH-CAH-TOA)' },
+    { n: 1, t: 'Definisi sin, cos, tan' },
     { n: 2, t: 'Sudut istimewa 30°, 45°, 60°, 90°' },
     { n: 3, t: 'Identitas Pythagoras sin²+cos²=1' },
     { n: 4, t: 'Aturan sinus dan cosinus' },
