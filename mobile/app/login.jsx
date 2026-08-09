@@ -95,7 +95,7 @@ export default function LoginScreen() {
 
           <View style={styles.demoBox}>
             <Text style={styles.demoTitle}>Info Login:</Text>
-            <Text style={styles.demoText}>Kode: S001 s/d S035  |  G001 s/d G035</Text>
+            <Text style={styles.demoText}>Siswa: S001–S035  |  Guru: G001–G010</Text>
             <Text style={styles.demoText}>Password: password123</Text>
           </View>
         </View>

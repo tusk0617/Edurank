@@ -1,5 +1,5 @@
 // ============================================================
-// Seed kode responden: S001-S030 dan G001-G035
+// Seed kode responden: S001-S035 (siswa) dan G001-G010 (guru)
 // Password default: password123
 // Jalankan: node seed-responden.js
 // ============================================================
@@ -11,24 +11,24 @@ const pool = require('../../db');
 async function seed() {
   const hash = await bcrypt.hash('password123', 10);
 
-  const codes = [
-    ...Array.from({ length: 35 }, (_, i) => `S${String(i + 1).padStart(3, '0')}`),
-    ...Array.from({ length: 35 }, (_, i) => `G${String(i + 1).padStart(3, '0')}`),
+  const entries = [
+    ...Array.from({ length: 35 }, (_, i) => ({ code: `S${String(i + 1).padStart(3, '0')}`, role: 'siswa' })),
+    ...Array.from({ length: 10 }, (_, i) => ({ code: `G${String(i + 1).padStart(3, '0')}`, role: 'guru' })),
   ];
 
   let inserted = 0;
   let skipped = 0;
 
-  for (const code of codes) {
-    const nama = `Siswa ${code}`;
+  for (const { code, role } of entries) {
+    const nama = `${role === 'guru' ? 'Guru' : 'Siswa'} ${code}`;
     try {
       const [result] = await pool.query(
         'INSERT IGNORE INTO users (username, nama, password, role) VALUES (?, ?, ?, ?)',
-        [code, nama, hash, 'siswa']
+        [code, nama, hash, role]
       );
       if (result.affectedRows > 0) {
         inserted++;
-        console.log(`✓ Dibuat: ${code}`);
+        console.log(`✓ Dibuat: ${code} (${role})`);
       } else {
         skipped++;
         console.log(`— Skip (sudah ada): ${code}`);
