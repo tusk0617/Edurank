@@ -59,7 +59,7 @@ api.interceptors.response.use(
 );
 
 // Auth
-export const login = (email, password) => api.post('/api/auth/login', { email, password });
+export const login = (username, password) => api.post('/api/auth/login', { username, password });
 export const register = (data) => api.post('/api/auth/register', data);
 export const getMe = () => api.get('/api/auth/me');
 
@@ -74,10 +74,6 @@ export const getProgressSaya = () => api.get('/api/modul/progress/saya');
 export const getAssessment = () => api.get('/api/assessment');
 export const getSoal = (id) => api.get(`/api/assessment/${id}/soal`);
 export const submitAssessment = (id, data) => api.post(`/api/assessment/${id}/submit`, data);
-
-// Ranking
-export const getRankingIndividu = (periode = 'semua') => api.get(`/api/ranking/individu?periode=${periode}`);
-export const getRankingSaya = () => api.get('/api/ranking/saya');
 
 // Guru
 export const getGuruSoal = () => api.get('/api/guru/soal');

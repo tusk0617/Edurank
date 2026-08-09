@@ -10,20 +10,20 @@ import Colors from '../constants/Colors';
 export default function LoginScreen() {
   const { login } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Perhatian', 'Email dan password wajib diisi');
+    if (!username.trim() || !password.trim()) {
+      Alert.alert('Perhatian', 'Kode responden dan password wajib diisi');
       return;
     }
 
     setLoading(true);
     try {
-      const loggedUser = await login(email.trim(), password);
+      const loggedUser = await login(username.trim(), password);
       if (loggedUser.role === 'guru') {
         router.replace('/(guru)/dashboard');
       } else {
@@ -55,15 +55,14 @@ export default function LoginScreen() {
 
         {/* Form */}
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Kode Responden</Text>
           <TextInput
             style={styles.input}
-            placeholder="contoh@email.com"
+            placeholder="Contoh: S001"
             placeholderTextColor={Colors.muted}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="characters"
             autoCorrect={false}
           />
 
@@ -95,8 +94,8 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Akun Demo:</Text>
-            <Text style={styles.demoText}>Email: siswa1@test.com</Text>
+            <Text style={styles.demoTitle}>Info Login:</Text>
+            <Text style={styles.demoText}>Kode: S001 s/d S030  |  G001 s/d G035</Text>
             <Text style={styles.demoText}>Password: password123</Text>
           </View>
         </View>

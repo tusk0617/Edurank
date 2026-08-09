@@ -7,31 +7,31 @@ const { verifyToken } = require('../middleware/auth');
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email dan password wajib diisi' });
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username dan password wajib diisi' });
   }
 
   try {
     const [rows] = await pool.query(
-      `SELECT u.* FROM users u WHERE u.email = ?`,
-      [email]
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, username]
     );
 
     if (rows.length === 0) {
-      return res.status(401).json({ message: 'Email atau password salah' });
+      return res.status(401).json({ message: 'Username atau password salah' });
     }
 
     const user = rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Email atau password salah' });
+      return res.status(401).json({ message: 'Username atau password salah' });
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );

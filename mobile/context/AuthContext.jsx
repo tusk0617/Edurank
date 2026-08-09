@@ -48,8 +48,8 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const login = async (email, password) => {
-    const res = await loginApi(email, password);
+  const login = async (username, password) => {
+    const res = await loginApi(username, password);
     const { token: newToken, user: newUser } = res.data;
     await storage.setItem('token', newToken);
     setToken(newToken);
