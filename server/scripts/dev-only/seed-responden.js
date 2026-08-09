@@ -12,7 +12,7 @@ async function seed() {
   const hash = await bcrypt.hash('password123', 10);
 
   const codes = [
-    ...Array.from({ length: 30 }, (_, i) => `S${String(i + 1).padStart(3, '0')}`),
+    ...Array.from({ length: 35 }, (_, i) => `S${String(i + 1).padStart(3, '0')}`),
     ...Array.from({ length: 35 }, (_, i) => `G${String(i + 1).padStart(3, '0')}`),
   ];
 
