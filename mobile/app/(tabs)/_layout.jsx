@@ -31,24 +31,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="modul"
-        options={{
-          title: 'Modul',
-          tabBarIcon: ({ color, size }) => <Ionicons name="book" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="assessment"
         options={{
           title: 'Ujian',
           tabBarIcon: ({ color, size }) => <Ionicons name="pencil" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="ranking"
-        options={{
-          title: 'Ranking',
-          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" size={size} color={color} />,
         }}
       />
       <Tabs.Screen

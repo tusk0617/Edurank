@@ -16,7 +16,6 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/modul', require('./routes/modul'));
 app.use('/api/assessment', require('./routes/assessment'));
-app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/guru', require('./routes/guru'));
 
 // Health check

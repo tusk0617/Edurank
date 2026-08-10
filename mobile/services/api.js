@@ -63,13 +63,6 @@ export const login = (username, password) => api.post('/api/auth/login', { usern
 export const register = (data) => api.post('/api/auth/register', data);
 export const getMe = () => api.get('/api/auth/me');
 
-// Modul
-export const getModul = () => api.get('/api/modul');
-export const getModulById = (id) => api.get(`/api/modul/${id}`);
-export const mulaiModul = (id) => api.post(`/api/modul/${id}/mulai`);
-export const selesaiModul = (id) => api.post(`/api/modul/${id}/selesai`);
-export const getProgressSaya = () => api.get('/api/modul/progress/saya');
-
 // Assessment
 export const getAssessment = () => api.get('/api/assessment');
 export const getSoal = (id) => api.get(`/api/assessment/${id}/soal`);

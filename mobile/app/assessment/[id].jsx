@@ -152,8 +152,6 @@ export default function AssessmentSoalScreen() {
             {hasil.potongan_remedial > 0 && (
               <HasilRow label="Potongan Remedial" value={`-${hasil.potongan_remedial}%`} color={Colors.warning} />
             )}
-            <HasilRow label="Poin Didapat" value={`+${hasil.poin_didapat} poin`} color={Colors.primary} bold />
-            {hasil.ranking_baru && <HasilRow label="Ranking Kamu" value={`#${hasil.ranking_baru}`} />}
             <HasilRow label="Percobaan Ke-" value={`${hasil.percobaan_ke}`} />
           </View>
 

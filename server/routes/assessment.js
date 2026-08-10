@@ -86,10 +86,7 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
     await conn.beginTransaction();
 
     // Get assessment & sesi info
-    const [[assessment]] = await conn.query(
-      'SELECT a.*, m.level AS modul_level FROM assessment a JOIN modul m ON a.modul_id = m.id WHERE a.id = ?',
-      [assessmentId]
-    );
+    const [[assessment]] = await conn.query('SELECT * FROM assessment WHERE id = ?', [assessmentId]);
     const [[sesi]] = await conn.query('SELECT * FROM hasil_assessment WHERE id = ? AND user_id = ?', [sesi_id, userId]);
 
     if (!sesi) {
@@ -147,45 +144,11 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
     const skorAkhir = Math.max(0, skor - potonganTerlambat - potonganRemedial);
     const lulus = skorAkhir >= 60;
     const statusHasil = lulus ? 'lulus' : (percobaan < assessment.max_retake ? 'remedial' : 'tidak_lulus');
-    const levelXpMap = { 1: 50, 2: 100, 3: 150 };
-    const levelXp = levelXpMap[assessment.modul_level] || 50;
-    const poinDidapat = Math.round((skorAkhir / 100) * levelXp * 5);
 
     // Update sesi
     await conn.query(
-      'UPDATE hasil_assessment SET skor = ?, poin_didapat = ?, waktu_selesai = NOW(), status = ? WHERE id = ?',
-      [skorAkhir, poinDidapat, statusHasil, sesi_id]
-    );
-
-    // Log poin
-    const tipePoin = percobaan > 1 ? 'remedial' : 'assessment';
-    await conn.query(
-      'INSERT INTO poin_log (user_id, jumlah, tipe, keterangan) VALUES (?, ?, ?, ?)',
-      [userId, poinDidapat, tipePoin, `${assessment.judul} - percobaan ke-${percobaan}`]
-    );
-
-    // Cek badge All Rounder
-    const [[{ total_poin }]] = await conn.query(
-      'SELECT COALESCE(SUM(jumlah), 0) AS total_poin FROM poin_log WHERE user_id = ?',
-      [userId]
-    );
-
-    let newBadges = [];
-    if (total_poin >= 500) {
-      const [[existing]] = await conn.query(
-        'SELECT id FROM user_badge WHERE user_id = ? AND badge_id = 5',
-        [userId]
-      );
-      if (!existing) {
-        await conn.query('INSERT IGNORE INTO user_badge (user_id, badge_id) VALUES (?, 5)', [userId]);
-        newBadges.push({ id: 5, nama: 'All Rounder', ikon_nama: 'trophy', warna_hex: '#E24B4A' });
-      }
-    }
-
-    // Get ranking baru
-    const [[rankRow]] = await conn.query(
-      `SELECT r.rank FROM v_ranking_individu r WHERE r.user_id = ?`,
-      [userId]
+      'UPDATE hasil_assessment SET skor = ?, waktu_selesai = NOW(), status = ? WHERE id = ?',
+      [skorAkhir, statusHasil, sesi_id]
     );
 
     await conn.commit();
@@ -195,13 +158,10 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
       skor_mentah: skor,
       potongan_terlambat: potonganTerlambat,
       potongan_remedial: potonganRemedial,
-      poin_didapat: poinDidapat,
       lulus,
       status: statusHasil,
-      ranking_baru: rankRow ? rankRow.rank : null,
       percobaan_ke: percobaan,
       bisa_remedial: !lulus && percobaan < assessment.max_retake,
-      new_badges: newBadges,
       pembahasan: pembahasanArr,
     });
   } catch (err) {
