@@ -17,7 +17,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
-      Alert.alert('Perhatian', 'Kode responden dan password wajib diisi');
+      Alert.alert('Perhatian', 'Username dan password wajib diisi');
       return;
     }
 
@@ -55,14 +55,14 @@ export default function LoginScreen() {
 
         {/* Form */}
         <View style={styles.form}>
-          <Text style={styles.label}>Kode Responden</Text>
+          <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
-            placeholder="Contoh: S001"
+            placeholder="Masukkan username"
             placeholderTextColor={Colors.muted}
             value={username}
             onChangeText={setUsername}
-            autoCapitalize="characters"
+            autoCapitalize="none"
             autoCorrect={false}
           />
 

@@ -45,13 +45,6 @@ export default function GuruLayout() {
         }}
       />
       <Tabs.Screen
-        name="live-monitor"
-        options={{
-          title: 'Live Monitor',
-          tabBarIcon: ({ color, size }) => <Ionicons name="radio" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="soal/[modulId]"
         options={{ href: null, tabBarStyle: { display: 'none' } }}
       />

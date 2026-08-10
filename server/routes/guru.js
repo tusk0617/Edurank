@@ -5,43 +5,6 @@ const { verifyToken, requireRole } = require('../middleware/auth');
 
 const guruOnly = [verifyToken, requireRole('guru')];
 
-// ── Live Class Monitoring (in-memory) ────────────────────────
-const liveStore = new Map(); // userId -> entry
-
-// POST /api/guru/live/update — siswa reports status (any authenticated user)
-router.post('/live/update', verifyToken, async (req, res) => {
-  const { status, judul, soal_ke, total_soal } = req.body;
-  const userId = req.user.id;
-  try {
-    const [[user]] = await pool.query('SELECT nama FROM users WHERE id = ?', [userId]);
-    liveStore.set(userId, {
-      user_id: userId,
-      nama: user?.nama || 'Unknown',
-      status: status || 'mengerjakan',
-      judul: judul || '',
-      soal_ke: soal_ke || 1,
-      total_soal: total_soal || 0,
-      updated_at: new Date(),
-    });
-    res.json({ ok: true });
-  } catch {
-    res.json({ ok: false });
-  }
-});
-
-// GET /api/guru/live — guru retrieves live student list
-router.get('/live', ...guruOnly, (req, res) => {
-  const now = new Date();
-  const data = [];
-  for (const [, entry] of liveStore.entries()) {
-    const secsSince = Math.floor((now - entry.updated_at) / 1000);
-    let status = entry.status;
-    if (status === 'mengerjakan' && secsSince > 45) status = 'keluar';
-    data.push({ ...entry, status, secs_since: secsSince });
-  }
-  res.json(data.sort((a, b) => a.nama.localeCompare(b.nama)));
-});
-
 // GET /api/guru/mapel — list mata pelajaran untuk picker
 router.get('/mapel', ...guruOnly, async (req, res) => {
   try {
@@ -158,7 +121,14 @@ router.delete('/soal/:id', ...guruOnly, async (req, res) => {
   }
 });
 
-const THRESHOLD_PERHATIAN = 60;
+const THRESHOLD_PERHATIAN = 65; // <65%: perlu perhatian
+const THRESHOLD_BAIK = 80;      // ≥80%: baik; 65-79%: cukup
+
+const getKategori = (persen) => {
+  if (persen >= THRESHOLD_BAIK) return 'baik';
+  if (persen >= THRESHOLD_PERHATIAN) return 'cukup';
+  return 'perlu_perhatian';
+};
 
 // GET /api/guru/gap/siswa — analisis capaian poin per siswa
 router.get('/gap/siswa', ...guruOnly, async (req, res) => {
@@ -185,10 +155,14 @@ router.get('/gap/siswa', ...guruOnly, async (req, res) => {
        GROUP BY u.id, u.nama
        ORDER BY persentase_capaian ASC`
     );
-    const siswa = rows.map(row => ({
-      ...row,
-      perlu_perhatian: parseFloat(row.persentase_capaian) < THRESHOLD_PERHATIAN,
-    }));
+    const siswa = rows.map(row => {
+      const persen = parseFloat(row.persentase_capaian);
+      return {
+        ...row,
+        kategori: getKategori(persen),
+        perlu_perhatian: persen < THRESHOLD_PERHATIAN,
+      };
+    });
     res.json(siswa);
   } catch (err) {
     console.error(err);

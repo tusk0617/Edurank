@@ -9,14 +9,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { getGuruGap, getGuruGapSiswa, getGuruGapModul, getGuruGapModulSoal } from '../../services/api';
 import Colors from '../../constants/Colors';
 
-const THRESHOLD_PERHATIAN = 60;
+const THRESHOLD_PERHATIAN = 65;
+const THRESHOLD_BAIK = 80;
 
 export default function GuruGap() {
   const [data, setData] = useState(null);
   const [siswaData, setSiswaData] = useState([]);
   const [modulList, setModulList] = useState([]);
   const [activeTab, setActiveTab] = useState('soal');
-  const [filterPerhatian, setFilterPerhatian] = useState(false);
+  const [filterKategori, setFilterKategori] = useState('semua');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -34,7 +35,11 @@ export default function GuruGap() {
         getGuruGapModul(),
       ]);
       setData(gapRes.data);
-      setSiswaData(siswaRes.data);
+      setSiswaData(siswaRes.data.map(s => {
+        const persen = parseFloat(s.persentase_capaian) || 0;
+        const kategori = s.kategori || (persen >= THRESHOLD_BAIK ? 'baik' : persen >= THRESHOLD_PERHATIAN ? 'cukup' : 'perlu_perhatian');
+        return { ...s, kategori };
+      }));
       setModulList(modulRes.data);
     } catch {
       setData(null);
@@ -74,9 +79,15 @@ export default function GuruGap() {
     return Colors.success;
   };
 
+  const getKategoriCfg = (kategori) => {
+    if (kategori === 'baik') return { color: Colors.success, label: 'Baik' };
+    if (kategori === 'cukup') return { color: Colors.warning, label: 'Cukup' };
+    return { color: Colors.danger, label: 'Perlu Perhatian' };
+  };
+
   const getCapaianColor = (persen) => {
-    if (persen >= THRESHOLD_PERHATIAN) return Colors.success;
-    if (persen >= 40) return Colors.warning;
+    if (persen >= THRESHOLD_BAIK) return Colors.success;
+    if (persen >= THRESHOLD_PERHATIAN) return Colors.warning;
     return Colors.danger;
   };
 
@@ -84,9 +95,9 @@ export default function GuruGap() {
     ? Math.max(...data.per_mapel.map(m => m.persen_salah || 0), 1)
     : 1;
 
-  const filteredSiswa = filterPerhatian
-    ? siswaData.filter(s => s.perlu_perhatian)
-    : siswaData;
+  const filteredSiswa = filterKategori === 'semua'
+    ? siswaData
+    : siswaData.filter(s => s.kategori === filterKategori);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -196,22 +207,22 @@ export default function GuruGap() {
         /* ===== TAB ANALISIS MURID ===== */
         <View style={{ flex: 1 }}>
           <View style={styles.filterRow}>
-            <TouchableOpacity
-              style={[styles.filterBtn, !filterPerhatian && styles.filterBtnActive]}
-              onPress={() => setFilterPerhatian(false)}
-            >
-              <Text style={[styles.filterBtnText, !filterPerhatian && styles.filterBtnTextActive]}>
-                Semua ({siswaData.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterBtn, filterPerhatian && styles.filterBtnDanger]}
-              onPress={() => setFilterPerhatian(true)}
-            >
-              <Text style={[styles.filterBtnText, filterPerhatian && styles.filterBtnTextActive]}>
-                Perlu Perhatian ({siswaData.filter(s => s.perlu_perhatian).length})
-              </Text>
-            </TouchableOpacity>
+            {[
+              { key: 'semua',            label: 'Semua',           count: siswaData.length,                                       activeStyle: styles.filterBtnActive },
+              { key: 'perlu_perhatian',  label: 'Perlu Perhatian', count: siswaData.filter(s => s.kategori === 'perlu_perhatian').length, activeStyle: styles.filterBtnDanger },
+              { key: 'cukup',            label: 'Cukup',           count: siswaData.filter(s => s.kategori === 'cukup').length,          activeStyle: styles.filterBtnWarning },
+              { key: 'baik',             label: 'Baik',            count: siswaData.filter(s => s.kategori === 'baik').length,           activeStyle: styles.filterBtnSuccess },
+            ].map(f => (
+              <TouchableOpacity
+                key={f.key}
+                style={[styles.filterBtn, filterKategori === f.key && f.activeStyle]}
+                onPress={() => setFilterKategori(f.key)}
+              >
+                <Text style={[styles.filterBtnText, filterKategori === f.key && styles.filterBtnTextActive]}>
+                  {f.label} ({f.count})
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           <FlatList
@@ -222,21 +233,20 @@ export default function GuruGap() {
             ListEmptyComponent={
               <View style={[styles.center, { paddingTop: 60 }]}>
                 <Text style={styles.emptyText}>
-                  {filterPerhatian ? 'Semua siswa dalam kondisi baik' : 'Belum ada data siswa'}
+                  {filterKategori === 'semua' ? 'Belum ada data siswa' : `Tidak ada siswa dalam kategori ${getKategoriCfg(filterKategori).label}`}
                 </Text>
               </View>
             }
             renderItem={({ item }) => {
               const persen = parseFloat(item.persentase_capaian) || 0;
               const color = getCapaianColor(persen);
+              const cfg = getKategoriCfg(item.kategori);
               return (
                 <View style={styles.siswaCard}>
                   <View style={styles.siswaHeader}>
                     <Text style={styles.siswaNama} numberOfLines={1}>{item.nama}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: item.perlu_perhatian ? Colors.danger + '20' : Colors.success + '20' }]}>
-                      <Text style={[styles.statusBadgeText, { color: item.perlu_perhatian ? Colors.danger : Colors.success }]}>
-                        {item.perlu_perhatian ? 'Perlu Perhatian' : 'Baik'}
-                      </Text>
+                    <View style={[styles.statusBadge, { backgroundColor: cfg.color + '25' }]}>
+                      <Text style={[styles.statusBadgeText, { color: cfg.color }]}>{cfg.label}</Text>
                     </View>
                   </View>
                   <Text style={styles.siswaPoin}>
@@ -368,10 +378,12 @@ const styles = StyleSheet.create({
 
   // Analisis Murid
   filterRow: { flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
-  filterBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card },
+  filterBtn: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.card },
   filterBtnActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   filterBtnDanger: { backgroundColor: Colors.danger, borderColor: Colors.danger },
-  filterBtnText: { fontSize: 12, fontWeight: '600', color: Colors.muted },
+  filterBtnWarning: { backgroundColor: Colors.warning, borderColor: Colors.warning },
+  filterBtnSuccess: { backgroundColor: Colors.success, borderColor: Colors.success },
+  filterBtnText: { fontSize: 11, fontWeight: '600', color: Colors.muted },
   filterBtnTextActive: { color: '#fff' },
   siswaList: { paddingHorizontal: 16, paddingBottom: 24 },
   siswaCard: { backgroundColor: Colors.card, borderRadius: 14, padding: 14, marginBottom: 10, elevation: 2 },
