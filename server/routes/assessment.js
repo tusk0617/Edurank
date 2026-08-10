@@ -58,9 +58,9 @@ router.get('/:id/soal', verifyToken, async (req, res) => {
       [userId, assessmentId, terlambat ? 1 : 0, percobaan + 1]
     );
 
-    // Ambil soal acak
+    // Ambil 10 soal acak dari bank soal
     const [soal] = await pool.query(
-      'SELECT id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d FROM soal WHERE modul_id = ? ORDER BY RAND()',
+      'SELECT id, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d FROM soal WHERE modul_id = ? ORDER BY RAND() LIMIT 10',
       [assessment.modul_id]
     );
 
