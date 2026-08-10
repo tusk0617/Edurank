@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
-  ActivityIndicator,
+  ActivityIndicator, AppState,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getSoal, submitAssessment } from '../../services/api';
+import { getSoal, submitAssessment, reportLiveStatus } from '../../services/api';
 import ProgressBar from '../../components/ui/ProgressBar';
 import Colors from '../../constants/Colors';
 
@@ -25,6 +25,51 @@ export default function AssessmentSoalScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [displaySkor, setDisplaySkor] = useState(0);
+  const [assessmentJudul, setAssessmentJudul] = useState('');
+
+  const inSoalRef = useRef(false);
+  const currentIdxRef = useRef(0);
+  const totalSoalRef = useRef(0);
+  const switchTimerRef = useRef(null);
+
+  const reportStatus = useCallback((status, soal_ke) => {
+    reportLiveStatus({
+      status,
+      judul: assessmentJudul,
+      soal_ke: soal_ke ?? currentIdxRef.current + 1,
+      total_soal: totalSoalRef.current,
+    });
+  }, [assessmentJudul]);
+
+  // AppState: detect when student leaves the app
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (!inSoalRef.current) return;
+      if (nextState === 'background' || nextState === 'inactive') {
+        reportLiveStatus({ status: 'keluar', judul: assessmentJudul, soal_ke: currentIdxRef.current + 1, total_soal: totalSoalRef.current });
+      } else if (nextState === 'active') {
+        reportLiveStatus({ status: 'mengerjakan', judul: assessmentJudul, soal_ke: currentIdxRef.current + 1, total_soal: totalSoalRef.current });
+      }
+    });
+    return () => {
+      sub.remove();
+      clearTimeout(switchTimerRef.current);
+      if (inSoalRef.current) {
+        reportLiveStatus({ status: 'keluar', judul: assessmentJudul, soal_ke: currentIdxRef.current + 1, total_soal: totalSoalRef.current });
+      }
+    };
+  }, [assessmentJudul]);
+
+  // Track question navigation
+  useEffect(() => {
+    currentIdxRef.current = currentIdx;
+    if (!inSoalRef.current) return;
+    clearTimeout(switchTimerRef.current);
+    reportLiveStatus({ status: 'berpindah', judul: assessmentJudul, soal_ke: currentIdx + 1, total_soal: totalSoalRef.current });
+    switchTimerRef.current = setTimeout(() => {
+      reportLiveStatus({ status: 'mengerjakan', judul: assessmentJudul, soal_ke: currentIdx + 1, total_soal: totalSoalRef.current });
+    }, 1500);
+  }, [currentIdx, assessmentJudul]);
 
   useEffect(() => {
     fetchSoal();
@@ -52,6 +97,10 @@ export default function AssessmentSoalScreen() {
       setSoalList(res.data.soal);
       setDurasiMenit(res.data.durasi_menit);
       setTimeLeft(res.data.durasi_menit * 60);
+      setAssessmentJudul(res.data.judul || '');
+      totalSoalRef.current = res.data.soal.length;
+      inSoalRef.current = true;
+      reportLiveStatus({ status: 'mengerjakan', judul: res.data.judul || '', soal_ke: 1, total_soal: res.data.soal.length });
       setScreen(SCREENS.SOAL);
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal memuat soal');
@@ -69,6 +118,8 @@ export default function AssessmentSoalScreen() {
 
       submitAssessment(id, { sesi_id: sesiId, jawaban: jawabanArr })
         .then(res => {
+          inSoalRef.current = false;
+          reportLiveStatus({ status: 'selesai', judul: assessmentJudul, soal_ke: totalSoalRef.current, total_soal: totalSoalRef.current });
           setHasil(res.data);
           setDisplaySkor(Math.round(res.data.skor));
           setScreen(SCREENS.HASIL);

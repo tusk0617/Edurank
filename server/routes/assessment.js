@@ -64,7 +64,7 @@ router.get('/:id/soal', verifyToken, async (req, res) => {
       [assessment.modul_id]
     );
 
-    res.json({ sesi_id: result.insertId, soal, durasi_menit: assessment.durasi_menit });
+    res.json({ sesi_id: result.insertId, soal, durasi_menit: assessment.durasi_menit, judul: assessment.judul });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
