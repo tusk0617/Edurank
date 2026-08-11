@@ -112,7 +112,8 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
       );
     }
 
-    const skor = totalBobot > 0 ? Math.round((totalBenar / totalBobot) * 100) : 0;
+    const skor = (totalBobot > 0 && !isNaN(totalBenar))
+      ? Math.round((totalBenar / totalBobot) * 100) : 0;
     const durasiDetik = Math.round((Date.now() - new Date(sesi.waktu_mulai).getTime()) / 1000);
 
     await conn.query(
@@ -124,8 +125,8 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
     res.json({ skor, durasi_detik: durasiDetik });
   } catch (err) {
     await conn.rollback();
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('[SUBMIT ERROR]', err.code, err.message);
+    res.status(500).json({ message: err.code || 'Server error' });
   } finally {
     conn.release();
   }
