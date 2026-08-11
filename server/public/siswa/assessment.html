@@ -14,7 +14,7 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg); min-height: 100vh; }
 
-  /* ── HEADER ── */
+  /* HEADER */
   .header { background: var(--card); border-bottom: 1px solid var(--border);
     padding: 12px 16px; display: flex; align-items: center; gap: 12px;
     position: sticky; top: 0; z-index: 20; }
@@ -23,19 +23,17 @@
   .header-center { flex: 1; }
   .progress-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
   .progress-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--primary);
-    border-radius: 3px; transition: width .3s; }
+  .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width .3s; }
   .timer { padding: 6px 12px; border-radius: 8px; background: var(--primary);
     color: #fff; font-size: 14px; font-weight: 700; min-width: 58px; text-align: center; }
   .timer.urgent { background: var(--danger); }
   .violation-badge { padding: 4px 8px; border-radius: 8px;
     background: #FEF2F2; color: var(--danger); font-size: 11px; font-weight: 700; }
 
-  /* ── SOAL ── */
+  /* SOAL */
   .soal-wrap { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
   .soal-num { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 12px; }
-  .soal-text { font-size: 16px; font-weight: 600; color: var(--text);
-    line-height: 1.6; margin-bottom: 20px; }
+  .soal-text { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.6; margin-bottom: 20px; }
   .opsi { display: flex; align-items: flex-start; gap: 12px; padding: 14px;
     border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 10px;
     cursor: pointer; background: var(--card); transition: all .15s; }
@@ -47,21 +45,20 @@
   .opsi.selected .opsi-circle { background: var(--primary); border-color: var(--primary); color: #fff; }
   .opsi-text { font-size: 14px; color: var(--text); line-height: 1.5; padding-top: 4px; }
 
-  /* ── NAVIGASI ── */
-  .nav-bar { position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--card); border-top: 1px solid var(--border);
-    padding: 12px 16px; display: flex; justify-content: space-between;
-    align-items: center; gap: 12px; max-width: 600px; margin: 0 auto; }
+  /* NAVIGASI */
+  .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card);
+    border-top: 1px solid var(--border); padding: 12px 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    max-width: 600px; margin: 0 auto; }
   .btn-nav { padding: 10px 20px; border: 1.5px solid var(--primary); border-radius: 8px;
-    background: none; color: var(--primary); font-weight: 600; font-size: 14px;
-    cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    background: none; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer; }
   .btn-nav:disabled { opacity: .35; cursor: not-allowed; }
-  .btn-submit { padding: 11px 24px; border: none; border-radius: 8px;
-    background: var(--secondary); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
   .btn-next { padding: 11px 20px; border: none; border-radius: 8px;
     background: var(--primary); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .btn-submit { padding: 11px 24px; border: none; border-radius: 8px;
+    background: var(--secondary); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
 
-  /* ── MODAL ── */
+  /* MODAL */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55);
     display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
   .overlay.hidden { display: none; }
@@ -76,42 +73,22 @@
   .modal-btn.danger  { background: var(--danger);  color: #fff; }
   .modal-btn.outline { background: none; border: 1.5px solid var(--border); color: var(--text); }
 
-  /* ── HASIL ── */
-  .hasil-wrap { padding: 40px 20px; max-width: 500px; margin: 0 auto; text-align: center; }
+  /* HASIL */
+  .hasil-wrap { padding: 40px 20px; max-width: 480px; margin: 0 auto; text-align: center; }
   .hasil-icon { font-size: 72px; margin-bottom: 8px; }
-  .hasil-skor { font-size: 64px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-  .hasil-status { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
-  .hasil-card { background: var(--card); border-radius: 14px; padding: 16px;
-    text-align: left; margin-bottom: 16px; }
-  .hasil-row { display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .hasil-skor { font-size: 72px; font-weight: 800; line-height: 1; margin-bottom: 20px; }
+  .hasil-card { background: var(--card); border-radius: 14px; padding: 20px; text-align: left; margin-bottom: 16px; }
+  .hasil-row { display: flex; justify-content: space-between; padding: 10px 0;
+    border-bottom: 1px solid var(--border); font-size: 14px; }
   .hasil-row:last-child { border-bottom: none; }
   .hasil-row .label { color: var(--muted); }
   .hasil-row .val { font-weight: 700; color: var(--text); }
-  .pembahasan-list { text-align: left; margin-bottom: 80px; }
-  .pembahasan-item { background: var(--card); border-radius: 10px; padding: 14px;
-    margin-bottom: 10px; border-left: 4px solid var(--border); }
-  .pembahasan-item.benar  { border-left-color: var(--success); }
-  .pembahasan-item.salah  { border-left-color: var(--danger); }
-  .pb-header { display: flex; justify-content: space-between;
-    font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
-  .pb-pertanyaan { font-size: 13px; color: var(--text); margin-bottom: 8px; line-height: 1.5; }
-  .pb-opsi { display: flex; gap: 6px; font-size: 12px; }
-  .pb-tag { padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-  .pb-tag.dipilih.salah-tag { background: #FEF2F2; color: var(--danger); }
-  .pb-tag.benar-tag  { background: #F0FDF4; color: var(--success); }
-  .btn-home { padding: 14px 32px; background: var(--primary); color: #fff;
-    border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
-    cursor: pointer; margin-top: 20px; width: 100%; }
-  .btn-remedial { padding: 14px 32px; background: var(--warning); color: #fff;
-    border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
-    cursor: pointer; margin-top: 10px; width: 100%; }
+  .btn-home { padding: 14px 32px; background: var(--primary); color: #fff; border: none;
+    border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 16px; }
 
-  .spinner { display: flex; justify-content: center; align-items: center;
-    height: 60vh; }
+  .spinner { display: flex; justify-content: center; align-items: center; height: 60vh; }
   .spin { width: 40px; height: 40px; border: 4px solid var(--border);
-    border-top-color: var(--primary); border-radius: 50%;
-    animation: spin .7s linear infinite; }
+    border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -122,9 +99,7 @@
   <button class="btn-close" onclick="confirmKeluar()" title="Keluar">✕</button>
   <div class="header-center">
     <div class="progress-label" id="progressLabel">Soal 1 / 10</div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill" style="width:10%"></div>
-    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
   </div>
   <div class="timer" id="timerEl">30:00</div>
   <div class="violation-badge" id="violationBadge" style="display:none">⚠ <span id="violationCount">0</span></div>
@@ -135,7 +110,7 @@
 
 <!-- Soal -->
 <div class="soal-wrap" id="soalEl" style="display:none">
-  <div class="soal-num" id="soalNum">Soal 1 dari 10</div>
+  <div class="soal-num" id="soalNum"></div>
   <div class="soal-text" id="soalText"></div>
   <div id="opsiList"></div>
   <div style="height:80px"></div>
@@ -151,16 +126,13 @@
 <!-- Hasil -->
 <div class="hasil-wrap" id="hasilEl" style="display:none"></div>
 
-<!-- Modal: Peringatan Tab Switch -->
+<!-- Modal: Tab Switch Warning -->
 <div class="overlay hidden" id="tabWarningModal">
   <div class="modal">
     <div class="modal-icon">⚠️</div>
     <div class="modal-title">Peringatan!</div>
-    <div class="modal-body" id="tabWarningBody">
-      Anda terdeteksi meninggalkan halaman assessment.<br/>
-      Aktivitas ini telah <strong>dicatat dan dilaporkan ke guru</strong>.
-    </div>
-    <button class="modal-btn primary" onclick="closeTabWarning()">Kembali ke Soal</button>
+    <div class="modal-body" id="tabWarningBody">Anda berpindah dari halaman assessment. Aktivitas ini dicatat.</div>
+    <button class="modal-btn primary" onclick="closeModal('tabWarningModal')">Kembali ke Soal</button>
   </div>
 </div>
 
@@ -171,11 +143,11 @@
     <div class="modal-title">Konfirmasi Submit</div>
     <div class="modal-body" id="submitModalBody">Yakin ingin mengumpulkan jawaban?</div>
     <button class="modal-btn danger" onclick="doSubmit()">Ya, Submit</button>
-    <button class="modal-btn outline" onclick="closeSubmitModal()">Batal</button>
+    <button class="modal-btn outline" onclick="closeModal('submitModal')">Batal</button>
   </div>
 </div>
 
-<!-- Modal: Konfirmasi Keluar -->
+<!-- Modal: Keluar -->
 <div class="overlay hidden" id="keluarModal">
   <div class="modal">
     <div class="modal-icon">🚪</div>
@@ -187,27 +159,22 @@
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════════════════
+// ── STATE ──
 const token        = localStorage.getItem('fs_token');
 const assessmentId = new URLSearchParams(location.search).get('id');
+if (!token)        location.href = '/siswa';
+if (!assessmentId) location.href = '/siswa/home';
 
-if (!token) { location.href = '/siswa'; }
-if (!assessmentId) { location.href = '/siswa/home'; }
-
-let soalList      = [];
-let sesiId        = null;
-let currentIdx    = 0;
-let jawaban       = {};       // { soal_id: 'a'|'b'|'c'|'d' }
+let soalList       = [];
+let sesiId         = null;
+let currentIdx     = 0;
+let jawaban        = {};
 let tabSwitchCount = 0;
-let timerInterval = null;
-let timeLeft      = 0;
-let isSubmitting  = false;
+let timerInterval  = null;
+let timeLeft       = 0;
+let isSubmitting   = false;
 
-// ════════════════════════════════════════════════════════════
-//  HELPER: API
-// ════════════════════════════════════════════════════════════
+// ── API ──
 async function api(url, opts = {}) {
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -218,9 +185,7 @@ async function api(url, opts = {}) {
   return res.json();
 }
 
-// ════════════════════════════════════════════════════════════
-//  INISIALISASI
-// ════════════════════════════════════════════════════════════
+// ── INIT ──
 async function init() {
   try {
     const data = await api(`/api/assessment/${assessmentId}/soal`);
@@ -238,43 +203,45 @@ async function init() {
     startTimer();
     renderSoal();
     setupPageVisibility();
-  } catch (e) {
+  } catch {
     showError('Gagal memuat soal. Periksa koneksi internet.');
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  PAGE VISIBILITY API  (inti fitur monitoring)
-// ════════════════════════════════════════════════════════════
+// ── PAGE VISIBILITY API ──
 function setupPageVisibility() {
   document.addEventListener('visibilitychange', handleVisibilityChange);
 }
 
 async function handleVisibilityChange() {
   if (document.hidden) {
+    // Siswa meninggalkan halaman
     tabSwitchCount++;
-
-    // Perbarui badge pelanggaran di header
     document.getElementById('violationBadge').style.display = 'flex';
     document.getElementById('violationCount').textContent   = tabSwitchCount;
-
-    // Kirim log ke backend
     try {
       await api(`/api/assessment/${assessmentId}/activity`, {
         method: 'POST',
-        body: { sesi_id: sesiId, jenis: 'tab_switch',
-                keterangan: `Halaman tidak aktif — pelanggaran ke-${tabSwitchCount}` },
+        body: {
+          sesi_id: sesiId,
+          jenis: 'tab_switch',
+          keterangan: `Perpindahan halaman ke-${tabSwitchCount}`,
+        },
       });
     } catch (_) {}
   } else {
-    // Siswa kembali ke halaman → tampilkan peringatan
-    if (tabSwitchCount > 0) showTabWarning();
+    // Siswa kembali ke halaman
+    if (tabSwitchCount > 0) {
+      document.getElementById('tabWarningBody').innerHTML =
+        `Anda terdeteksi meninggalkan halaman assessment.<br/>
+         Aktivitas ini telah <strong>dicatat dan dilaporkan ke guru</strong>.<br/><br/>
+         <strong style="color:var(--danger)">Pelanggaran ke-${tabSwitchCount}</strong>`;
+      openModal('tabWarningModal');
+    }
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  TIMER
-// ════════════════════════════════════════════════════════════
+// ── TIMER ──
 function startTimer() {
   renderTimer();
   timerInterval = setInterval(() => {
@@ -285,56 +252,44 @@ function startTimer() {
 }
 
 function renderTimer() {
-  const m   = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-  const s   = String(timeLeft % 60).padStart(2, '0');
-  const el  = document.getElementById('timerEl');
+  const m  = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const s  = String(timeLeft % 60).padStart(2, '0');
+  const el = document.getElementById('timerEl');
   el.textContent = `${m}:${s}`;
   el.className   = 'timer' + (timeLeft < 60 ? ' urgent' : '');
 }
 
-// ════════════════════════════════════════════════════════════
-//  RENDER SOAL
-// ════════════════════════════════════════════════════════════
+// ── SOAL ──
 function renderSoal() {
   const soal  = soalList[currentIdx];
   const total = soalList.length;
 
-  document.getElementById('soalNum').textContent   = `Soal ${currentIdx + 1} dari ${total}`;
-  document.getElementById('soalText').textContent  = soal.pertanyaan;
+  document.getElementById('soalNum').textContent       = `Soal ${currentIdx + 1} dari ${total}`;
+  document.getElementById('soalText').textContent      = soal.pertanyaan;
   document.getElementById('progressLabel').textContent = `Soal ${currentIdx + 1} / ${total}`;
   document.getElementById('progressFill').style.width  = `${((currentIdx + 1) / total) * 100}%`;
 
-  const opsiList = document.getElementById('opsiList');
-  opsiList.innerHTML = ['a', 'b', 'c', 'd'].map(opt => `
-    <div class="opsi ${jawaban[soal.id] === opt ? 'selected' : ''}"
-         onclick="pilihJawaban('${opt}')">
+  document.getElementById('opsiList').innerHTML = ['a', 'b', 'c', 'd'].map(opt => `
+    <div class="opsi ${jawaban[soal.id] === opt ? 'selected' : ''}" onclick="pilih('${opt}')">
       <div class="opsi-circle">${opt.toUpperCase()}</div>
       <div class="opsi-text">${soal[`opsi_${opt}`]}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 
-  // Navigasi
   document.getElementById('btnPrev').disabled = currentIdx === 0;
   const isLast = currentIdx === total - 1;
-  document.getElementById('btnNext').style.display   = isLast ? 'none' : 'block';
+  document.getElementById('btnNext').style.display   = isLast ? 'none'  : 'block';
   document.getElementById('btnSubmit').style.display = isLast ? 'block' : 'none';
 }
 
-function pilihJawaban(opt) {
-  jawaban[soalList[currentIdx].id] = opt;
-  renderSoal();
-}
-
+function pilih(opt) { jawaban[soalList[currentIdx].id] = opt; renderSoal(); }
 function prevSoal() { if (currentIdx > 0) { currentIdx--; renderSoal(); } }
 function nextSoal() { if (currentIdx < soalList.length - 1) { currentIdx++; renderSoal(); } }
 
-// ════════════════════════════════════════════════════════════
-//  SUBMIT
-// ════════════════════════════════════════════════════════════
+// ── SUBMIT ──
 function confirmSubmit() {
   const belum = soalList.length - Object.keys(jawaban).length;
   document.getElementById('submitModalBody').innerHTML = belum > 0
-    ? `Masih ada <strong>${belum} soal</strong> yang belum dijawab. Soal yang belum dijawab dianggap salah.<br/><br/>Yakin ingin mengumpulkan?`
+    ? `Masih ada <strong>${belum} soal</strong> yang belum dijawab. Yakin ingin mengumpulkan?`
     : 'Semua soal sudah dijawab. Yakin ingin mengumpulkan?';
   openModal('submitModal');
 }
@@ -346,10 +301,9 @@ async function doSubmit(auto = false) {
   clearInterval(timerInterval);
   document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-  // Sembunyikan soal + nav
-  document.getElementById('soalEl').style.display = 'none';
-  document.getElementById('navBar').style.display = 'none';
-  document.getElementById('headerEl').style.display = 'none';
+  document.getElementById('soalEl').style.display    = 'none';
+  document.getElementById('navBar').style.display    = 'none';
+  document.getElementById('headerEl').style.display  = 'none';
   document.getElementById('loadingEl').style.display = 'flex';
 
   const jawabanArr = soalList.map(s => ({
@@ -371,74 +325,44 @@ async function doSubmit(auto = false) {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  RENDER HASIL
-// ════════════════════════════════════════════════════════════
+// ── HASIL (sederhana: skor + durasi) ──
 function renderHasil(data) {
-  const lulus      = data.lulus;
-  const skor       = Math.round(data.skor);
-  const warnSkor   = lulus ? '#22C55E' : '#E24B4A';
-  const statusText = lulus ? '🎉 LULUS!' : 'BELUM LULUS';
-  const ikon       = lulus ? '✅' : '❌';
+  const skor  = data.skor;
+  const color = skor >= 80 ? 'var(--success)' : skor >= 60 ? 'var(--warning)' : 'var(--danger)';
+  const ikon  = skor >= 60 ? '✅' : '❌';
 
-  let rows = `
-    <div class="hasil-row"><span class="label">Skor Mentah</span>
-      <span class="val">${Math.round(data.skor_mentah)}%</span></div>`;
-  if (data.potongan_terlambat > 0)
-    rows += `<div class="hasil-row"><span class="label">Potongan Terlambat</span>
-      <span class="val" style="color:var(--danger)">-${data.potongan_terlambat}%</span></div>`;
-  if (data.potongan_remedial > 0)
-    rows += `<div class="hasil-row"><span class="label">Potongan Remedial</span>
-      <span class="val" style="color:var(--warning)">-${data.potongan_remedial}%</span></div>`;
-  rows += `<div class="hasil-row"><span class="label">Percobaan ke-</span>
-    <span class="val">${data.percobaan_ke}</span></div>`;
-  if (tabSwitchCount > 0)
-    rows += `<div class="hasil-row"><span class="label">Pelanggaran Terdeteksi</span>
-      <span class="val" style="color:var(--danger)">${tabSwitchCount}x berpindah halaman</span></div>`;
-
-  const pembahasan = (data.pembahasan || []).map((p, i) => `
-    <div class="pembahasan-item ${p.benar ? 'benar' : 'salah'}">
-      <div class="pb-header">
-        <span>Soal ${i + 1}</span>
-        <span style="color:${p.benar ? 'var(--success)' : 'var(--danger)'}">
-          ${p.benar ? '✓ Benar' : '✗ Salah'}</span>
-      </div>
-      <div class="pb-pertanyaan">${p.pertanyaan}</div>
-      <div class="pb-opsi">
-        <span class="pb-tag dipilih ${p.benar ? 'benar-tag' : 'salah-tag'}">
-          Jawaban: ${(p.jawaban_dipilih || '').toUpperCase()}</span>
-        ${!p.benar ? `<span class="pb-tag benar-tag">Benar: ${(p.jawaban_benar || '').toUpperCase()}</span>` : ''}
-      </div>
-    </div>`).join('');
+  const totalDetik = data.durasi_detik || 0;
+  const m = Math.floor(totalDetik / 60);
+  const s = totalDetik % 60;
+  const durasiStr = `${m} menit ${s} detik`;
 
   document.getElementById('hasilEl').innerHTML = `
     <div class="hasil-icon">${ikon}</div>
-    <div class="hasil-skor" style="color:${warnSkor}">${skor}</div>
-    <div class="hasil-status" style="color:${warnSkor}">${statusText}</div>
-    <div class="hasil-card">${rows}</div>
-    <div class="pembahasan-list">${pembahasan}</div>
-    ${data.bisa_remedial ? `<button class="btn-remedial"
-      onclick="window.location.href='/siswa/assessment?id=${assessmentId}'">🔄 Ikuti Remedial</button>` : ''}
+    <div class="hasil-skor" style="color:${color}">${skor}</div>
+    <div class="hasil-card">
+      <div class="hasil-row">
+        <span class="label">Skor</span>
+        <span class="val" style="color:${color}">${skor} / 100</span>
+      </div>
+      <div class="hasil-row">
+        <span class="label">Durasi Pengerjaan</span>
+        <span class="val">${durasiStr}</span>
+      </div>
+      ${tabSwitchCount > 0 ? `
+      <div class="hasil-row">
+        <span class="label">Perpindahan Tab</span>
+        <span class="val" style="color:var(--danger)">${tabSwitchCount}x terdeteksi</span>
+      </div>` : ''}
+    </div>
     <button class="btn-home" onclick="window.location.href='/siswa/home'">🏠 Kembali ke Beranda</button>
   `;
   document.getElementById('hasilEl').style.display = 'block';
 }
 
-// ════════════════════════════════════════════════════════════
-//  MODAL HELPERS
-// ════════════════════════════════════════════════════════════
-function showTabWarning() {
-  document.getElementById('tabWarningBody').innerHTML =
-    `Anda terdeteksi meninggalkan halaman assessment.<br/>
-     Aktivitas ini telah <strong>dicatat dan dilaporkan ke guru</strong>.<br/><br/>
-     <strong style="color:var(--danger)">Pelanggaran ke-${tabSwitchCount}</strong>`;
-  openModal('tabWarningModal');
-}
-function closeTabWarning() { closeModal('tabWarningModal'); }
-function confirmKeluar()   { openModal('keluarModal'); }
-function closeSubmitModal(){ closeModal('submitModal'); }
-function openModal(id)     { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id)    { document.getElementById(id).classList.add('hidden'); }
+// ── MODAL ──
+function confirmKeluar() { openModal('keluarModal'); }
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 function showError(msg) {
   document.getElementById('loadingEl').style.display = 'none';
@@ -447,14 +371,10 @@ function showError(msg) {
       <div style="font-size:48px;margin-bottom:16px">⚠️</div>
       <p style="color:var(--danger);font-weight:600;margin-bottom:16px">${msg}</p>
       <button onclick="history.back()" style="padding:12px 24px;background:var(--primary);
-        color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-        Kembali</button>
+        color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Kembali</button>
     </div>`;
 }
 
-// ════════════════════════════════════════════════════════════
-//  START
-// ════════════════════════════════════════════════════════════
 init();
 </script>
 </body>

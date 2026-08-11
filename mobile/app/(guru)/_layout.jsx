@@ -37,19 +37,10 @@ export default function GuruLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="document-text" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="statistik"
-        options={{
-          title: 'Statistik',
-          tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="soal/[modulId]"
-        options={{ href: null, tabBarStyle: { display: 'none' } }}
-      />
-      <Tabs.Screen name="assessment/index" options={{ href: null }} />
-      <Tabs.Screen name="activity-log" options={{ href: null }} />
+      <Tabs.Screen name="soal/bulk"         options={{ href: null }} />
+      <Tabs.Screen name="assessment/index"  options={{ href: null }} />
+      <Tabs.Screen name="assessment/hasil"  options={{ href: null }} />
+      <Tabs.Screen name="activity-log"      options={{ href: null }} />
     </Tabs>
   );
 }

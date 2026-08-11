@@ -16,34 +16,23 @@ const storage = {
   },
 };
 
-const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-});
+const api = axios.create({ baseURL: BASE_URL, timeout: 10000 });
 
-// Request interceptor: attach token
 api.interceptors.request.use(async (config) => {
   const token = await storage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Response interceptor: handle 401 & network error
 let offlineAlertShown = false;
 api.interceptors.response.use(
   (response) => { offlineAlertShown = false; return response; },
   async (error) => {
     if (!error.response) {
-      // Network error / no internet
       if (!offlineAlertShown) {
         offlineAlertShown = true;
-        Alert.alert(
-          '🔌 Tidak Ada Koneksi',
-          'Pastikan perangkat Anda terhubung ke internet, lalu coba lagi.',
-          [{ text: 'OK', onPress: () => { offlineAlertShown = false; } }]
-        );
+        Alert.alert('🔌 Tidak Ada Koneksi', 'Pastikan perangkat Anda terhubung ke internet, lalu coba lagi.',
+          [{ text: 'OK', onPress: () => { offlineAlertShown = false; } }]);
       }
       return Promise.reject(error);
     }
@@ -60,35 +49,32 @@ api.interceptors.response.use(
 
 // Auth
 export const login = (username, password) => api.post('/api/auth/login', { username, password });
-export const register = (data) => api.post('/api/auth/register', data);
 export const getMe = () => api.get('/api/auth/me');
-
-// Assessment (siswa)
-export const getAssessment = () => api.get('/api/assessment');
-export const getSoal = (id) => api.get(`/api/assessment/${id}/soal`);
-export const submitAssessment = (id, data) => api.post(`/api/assessment/${id}/submit`, data);
-export const logActivity = (id, data) => api.post(`/api/assessment/${id}/activity`, data);
-
-// Guru
-export const getGuruSoal = () => api.get('/api/guru/soal');
-export const getGuruModul = () => api.get('/api/guru/modul');
-export const getGuruMapel = () => api.get('/api/guru/mapel');
-export const createModul = (data) => api.post('/api/guru/modul', data);
-export const createSoal = (data) => api.post('/api/guru/soal', data);
-export const updateSoal = (id, data) => api.put(`/api/guru/soal/${id}`, data);
-export const deleteSoal = (id) => api.delete(`/api/guru/soal/${id}`);
-// Statistik guru
-export const getGuruStatistikSoal = () => api.get('/api/guru/statistik/soal');
-export const getGuruStatistikSiswa = (userId) => api.get(`/api/guru/statistik/siswa/${userId}`);
-// Assessment guru (CRUD)
-export const getGuruAssessment = () => api.get('/api/guru/assessment');
-export const createAssessment = (data) => api.post('/api/guru/assessment', data);
-export const updateAssessment = (id, data) => api.put(`/api/guru/assessment/${id}`, data);
-export const deleteAssessment = (id) => api.delete(`/api/guru/assessment/${id}`);
-// Activity log guru
-export const getGuruActivityLog = () => api.get('/api/guru/activity-log');
-export const getGuruActivityLogDetail = (hasilId) => api.get(`/api/guru/activity-log/${hasilId}`);
-// Auth actions
 export const changePassword = (data) => api.put('/api/auth/change-password', data);
+
+// Guru — Soal
+export const getGuruSoal    = ()       => api.get('/api/guru/soal');
+export const createSoal     = (data)   => api.post('/api/guru/soal', data);
+export const bulkCreateSoal = (soal)   => api.post('/api/guru/soal/bulk', { soal });
+export const updateSoal     = (id, d)  => api.put(`/api/guru/soal/${id}`, d);
+export const deleteSoal     = (id)     => api.delete(`/api/guru/soal/${id}`);
+
+// Guru — Assessment
+export const getGuruAssessment       = ()       => api.get('/api/guru/assessment');
+export const getGuruAssessmentSoalIds= (id)     => api.get(`/api/guru/assessment/${id}/soal-ids`);
+export const getGuruAssessmentHasil  = (id)     => api.get(`/api/guru/assessment/${id}/hasil`);
+export const createAssessment        = (data)   => api.post('/api/guru/assessment', data);
+export const updateAssessment        = (id, d)  => api.put(`/api/guru/assessment/${id}`, d);
+export const deleteAssessment        = (id)     => api.delete(`/api/guru/assessment/${id}`);
+
+// Guru — Activity Log
+export const getGuruActivityLog       = ()    => api.get('/api/guru/activity-log');
+export const getGuruActivityLogDetail = (id)  => api.get(`/api/guru/activity-log/${id}`);
+
+// Siswa — Assessment
+export const getAssessment    = ()          => api.get('/api/assessment');
+export const getSoal          = (id)        => api.get(`/api/assessment/${id}/soal`);
+export const submitAssessment = (id, data)  => api.post(`/api/assessment/${id}/submit`, data);
+export const logActivity      = (id, data)  => api.post(`/api/assessment/${id}/activity`, data);
 
 export default api;

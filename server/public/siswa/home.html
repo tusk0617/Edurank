@@ -23,25 +23,20 @@
     background: var(--secondary); color: #fff; font-weight: 800;
     font-size: 14px; display: flex; align-items: center; justify-content: center; }
   main { padding: 20px; max-width: 600px; margin: 0 auto; }
-  .section-title { font-size: 15px; font-weight: 700; color: var(--text);
-    margin-bottom: 14px; }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
   .card { background: var(--card); border-radius: 14px; padding: 16px;
     margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .card-top { display: flex; justify-content: space-between;
-    align-items: center; margin-bottom: 8px; }
-  .mapel-row { display: flex; align-items: center; gap: 6px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; }
-  .mapel-text { font-size: 12px; font-weight: 600; }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .badge { display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
-  .card-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-  .card-modul { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .card-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
   .info-row { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
-  .info-item { display: flex; align-items: center; gap: 4px;
-    font-size: 12px; color: var(--muted); }
+  .info-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
   .btn-start { width: 100%; padding: 12px; border: none; border-radius: 10px;
     font-size: 14px; font-weight: 700; color: #fff; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px; }
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--secondary); }
+  .btn-start:hover { opacity: .9; }
   .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .logout-btn { background: none; border: none; color: var(--danger);
@@ -51,6 +46,8 @@
     border-radius: 50%; animation: spin .7s linear infinite; margin: 40px auto; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-wrap { display: flex; justify-content: center; }
+  .selesai-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    background: #F0FDF4; border-radius: 10px; font-size: 13px; color: var(--success); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -77,28 +74,11 @@
   const nama     = localStorage.getItem('fs_nama') || 'Siswa';
   const username = localStorage.getItem('fs_username') || '';
 
-  // Header
   const h = new Date().getHours();
   document.getElementById('greeting').textContent =
     h < 11 ? 'Selamat Pagi,' : h < 15 ? 'Selamat Siang,' : h < 18 ? 'Selamat Sore,' : 'Selamat Malam,';
   document.getElementById('namaUser').textContent = nama + ' 👋';
   document.getElementById('avatarEl').textContent = (username[0] || 'S').toUpperCase() + (username[1] || '');
-
-  const STATUS = {
-    tersedia:    { label: 'Tersedia',   color: '#378ADD', bg: '#EBF4FF' },
-    remedial:    { label: 'Remedial',   color: '#EF9F27', bg: '#FFF8EC' },
-    lulus:       { label: 'Lulus',      color: '#22C55E', bg: '#F0FDF4' },
-    tidak_lulus: { label: 'Tdk Lulus',  color: '#E24B4A', bg: '#FEF2F2' },
-    habis:       { label: 'Habis',      color: '#6B7280', bg: '#F3F4F6' },
-  };
-
-  function getStatus(item) {
-    if (!item.status_terakhir) return 'tersedia';
-    if (item.status_terakhir === 'lulus') return 'lulus';
-    if (item.status_terakhir === 'remedial') return 'remedial';
-    if ((item.jumlah_percobaan || 0) >= item.max_retake) return 'habis';
-    return 'tersedia';
-  }
 
   async function load() {
     try {
@@ -118,41 +98,34 @@
         '<div class="empty"><div class="empty-icon">📄</div><p>Belum ada ujian tersedia</p></div>';
       return;
     }
-
     document.getElementById('content').innerHTML = list.map(item => {
-      const s   = getStatus(item);
-      const cfg = STATUS[s];
-      const sisa = item.max_retake - (item.jumlah_percobaan || 0);
-      const bisa = s === 'tersedia' || s === 'remedial';
-      const btnColor = s === 'remedial' ? '#EF9F27' : '#639922';
-      const btnLabel = s === 'remedial' ? '🔄 Ikuti Remedial' : '▶ Mulai Ujian';
-      const dotColor = item.warna_hex || '#378ADD';
+      const selesai = item.status === 'selesai';
+      const deadline = item.deadline
+        ? new Date(item.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+        : null;
 
       return `
         <div class="card">
           <div class="card-top">
-            <div class="mapel-row">
-              <div class="dot" style="background:${dotColor}"></div>
-              <span class="mapel-text" style="color:${dotColor}">${item.nama_mapel}</span>
-            </div>
-            <span class="badge" style="color:${cfg.color};background:${cfg.bg}">${cfg.label}</span>
+            <span class="card-title" style="margin:0">${item.judul}</span>
+            <span class="badge" style="color:${selesai ? 'var(--success)' : 'var(--primary)'};background:${selesai ? '#F0FDF4' : '#EBF4FF'}">
+              ${selesai ? '✓ Selesai' : '● Tersedia'}
+            </span>
           </div>
-          <div class="card-title">${item.judul}</div>
-          <div class="card-modul">${item.nama_modul}</div>
           <div class="info-row">
             <div class="info-item">⏱ ${item.durasi_menit} menit</div>
-            ${sisa > 0 ? `<div class="info-item">🔄 ${sisa} percobaan tersisa</div>` : ''}
-            ${item.skor_terbaik != null ? `<div class="info-item">⭐ Skor: ${Math.round(item.skor_terbaik)}</div>` : ''}
+            <div class="info-item">📝 ${item.jumlah_soal} soal</div>
+            ${deadline ? `<div class="info-item">📅 ${deadline}</div>` : ''}
           </div>
-          ${bisa ? `<button class="btn-start" style="background:${btnColor}"
-            onclick="mulaiAssessment(${item.id})">${btnLabel}</button>` : ''}
+          ${selesai
+            ? `<div class="selesai-row">✓ Kamu sudah menyelesaikan ujian ini — Skor: <strong>${Math.round(parseFloat(item.skor) || 0)}</strong></div>`
+            : `<button class="btn-start" onclick="mulai(${item.id})">▶ Mulai Ujian</button>`
+          }
         </div>`;
     }).join('');
   }
 
-  function mulaiAssessment(id) {
-    window.location.href = `/siswa/assessment?id=${id}`;
-  }
+  function mulai(id) { window.location.href = `/siswa/assessment?id=${id}`; }
 
   function handleLogout() {
     if (!confirm('Yakin ingin keluar?')) return;

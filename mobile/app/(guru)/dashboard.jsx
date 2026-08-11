@@ -110,17 +110,6 @@ export default function GuruDashboard() {
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/statistik')} activeOpacity={0.85}>
-          <View style={[styles.menuIcon, { backgroundColor: '#FFF4E5' }]}>
-            <Ionicons name="stats-chart" size={28} color={Colors.warning} />
-          </View>
-          <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>Statistik</Text>
-            <Text style={styles.menuDesc}>Tingkat keberhasilan per soal & detail jawaban siswa</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
-        </TouchableOpacity>
-
         <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/assessment')} activeOpacity={0.85}>
           <View style={[styles.menuIcon, { backgroundColor: '#EBF4FF' }]}>
             <Ionicons name="clipboard" size={28} color={Colors.primary} />

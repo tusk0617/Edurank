@@ -1,32 +1,36 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  RefreshControl, ActivityIndicator, Alert, Modal, TextInput, Platform,
+  RefreshControl, ActivityIndicator, Alert, Modal, TextInput, FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
-import { getGuruAssessment, createAssessment, updateAssessment, deleteAssessment, getGuruModul } from '../../../services/api';
+import { useFocusEffect, router } from 'expo-router';
+import {
+  getGuruAssessment, createAssessment, updateAssessment, deleteAssessment,
+  getGuruAssessmentSoalIds, getGuruSoal,
+} from '../../../services/api';
 import Colors from '../../../constants/Colors';
 
-const EMPTY_FORM = { judul: '', modul_id: '', durasi_menit: '30', max_retake: '3', deadline: '' };
+const EMPTY_FORM = { judul: '', durasi_menit: '30', deadline: '' };
 
 export default function GuruAssessment() {
-  const [list, setList]           = useState([]);
-  const [modulList, setModulList] = useState([]);
-  const [loading, setLoading]     = useState(true);
+  const [list, setList]       = useState([]);
+  const [soalBank, setSoalBank] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [formVisible, setFormVisible]   = useState(false);
+  const [pickerVisible, setPickerVisible] = useState(false);
   const [editTarget, setEditTarget]     = useState(null);
   const [form, setForm]                 = useState(EMPTY_FORM);
+  const [selectedIds, setSelectedIds]   = useState([]);
   const [saving, setSaving]             = useState(false);
-  const [modulPickerVisible, setModulPickerVisible] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const [aRes, mRes] = await Promise.all([getGuruAssessment(), getGuruModul()]);
+      const [aRes, sRes] = await Promise.all([getGuruAssessment(), getGuruSoal()]);
       setList(aRes.data);
-      setModulList(mRes.data);
+      setSoalBank(sRes.data);
     } catch { /* noop */ }
     finally { setLoading(false); setRefreshing(false); }
   }, []);
@@ -36,43 +40,51 @@ export default function GuruAssessment() {
   const openCreate = () => {
     setEditTarget(null);
     setForm(EMPTY_FORM);
-    setModalVisible(true);
+    setSelectedIds([]);
+    setFormVisible(true);
   };
 
-  const openEdit = (item) => {
+  const openEdit = async (item) => {
     setEditTarget(item);
     setForm({
       judul: item.judul,
-      modul_id: String(item.modul_id),
       durasi_menit: String(item.durasi_menit),
-      max_retake: String(item.max_retake),
       deadline: item.deadline ? item.deadline.split('T')[0] : '',
     });
-    setModalVisible(true);
+    try {
+      const res = await getGuruAssessmentSoalIds(item.id);
+      setSelectedIds(res.data);
+    } catch { setSelectedIds([]); }
+    setFormVisible(true);
+  };
+
+  const toggleSoal = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
   };
 
   const handleSave = async () => {
-    if (!form.judul.trim() || !form.modul_id || !form.durasi_menit) {
-      Alert.alert('Perhatian', 'Judul, modul, dan durasi wajib diisi');
-      return;
+    if (!form.judul.trim() || !form.durasi_menit) {
+      return Alert.alert('Perhatian', 'Judul dan durasi wajib diisi');
+    }
+    if (selectedIds.length === 0) {
+      return Alert.alert('Perhatian', 'Pilih minimal 1 soal');
     }
     setSaving(true);
     try {
       const payload = {
         judul: form.judul.trim(),
-        modul_id: Number(form.modul_id),
         durasi_menit: Number(form.durasi_menit) || 30,
-        max_retake: Number(form.max_retake) || 3,
         deadline: form.deadline || null,
+        soal_ids: selectedIds,
       };
       if (editTarget) {
         await updateAssessment(editTarget.id, payload);
-        Alert.alert('Berhasil', 'Assessment berhasil diperbarui');
       } else {
         await createAssessment(payload);
-        Alert.alert('Berhasil', 'Assessment berhasil dibuat');
       }
-      setModalVisible(false);
+      setFormVisible(false);
       fetchData();
     } catch (err) {
       Alert.alert('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
@@ -80,169 +92,123 @@ export default function GuruAssessment() {
   };
 
   const handleDelete = (item) => {
-    Alert.alert(
-      'Hapus Assessment',
-      `Hapus "${item.judul}"? Semua data hasil siswa akan ikut terhapus.`,
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Hapus', style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteAssessment(item.id);
-              fetchData();
-            } catch (err) {
-              Alert.alert('Gagal', err.response?.data?.message || 'Gagal menghapus');
-            }
-          },
+    Alert.alert('Hapus Assessment', `Hapus "${item.judul}"? Semua data hasil siswa akan ikut terhapus.`, [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Hapus', style: 'destructive',
+        onPress: async () => {
+          try { await deleteAssessment(item.id); fetchData(); }
+          catch { Alert.alert('Gagal', 'Gagal menghapus assessment'); }
         },
-      ]
-    );
+      },
+    ]);
   };
 
-  const selectedModul = modulList.find(m => String(m.id) === String(form.modul_id));
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </View>
-    );
-  }
+  if (loading) return <View style={s.center}><ActivityIndicator size="large" color={Colors.primary} /></View>;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Kelola Assessment</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={openCreate} activeOpacity={0.85}>
+    <SafeAreaView style={s.safe}>
+      <View style={s.header}>
+        <Text style={s.headerTitle}>Kelola Assessment</Text>
+        <TouchableOpacity style={s.addBtn} onPress={openCreate} activeOpacity={0.85}>
           <Ionicons name="add" size={20} color="#fff" />
-          <Text style={styles.addBtnText}>Buat</Text>
+          <Text style={s.addBtnText}>Buat</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={s.listContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor={Colors.primary} />}
         showsVerticalScrollIndicator={false}
       >
         {list.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>📋</Text>
-            <Text style={styles.emptyText}>Belum ada assessment{'\n'}Tekan "Buat" untuk membuat yang pertama</Text>
+          <View style={s.empty}>
+            <Text style={s.emptyIcon}>📋</Text>
+            <Text style={s.emptyText}>Belum ada assessment{'\n'}Tekan "Buat" untuk membuat yang pertama</Text>
           </View>
         ) : list.map(item => {
-          const hasDeadline = !!item.deadline;
-          const deadlineStr = hasDeadline
+          const deadline = item.deadline
             ? new Date(item.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
             : 'Tanpa batas';
           return (
-            <View key={item.id} style={styles.card}>
-              <View style={styles.cardTop}>
-                <View style={[styles.mapelDot, { backgroundColor: item.warna_hex || Colors.primary }]} />
-                <Text style={[styles.mapelText, { color: item.warna_hex || Colors.primary }]}>{item.mapel}</Text>
-                <View style={styles.cardActions}>
-                  <TouchableOpacity onPress={() => openEdit(item)} style={styles.iconBtn}>
-                    <Ionicons name="pencil" size={18} color={Colors.primary} />
+            <View key={item.id} style={s.card}>
+              <View style={s.cardTop}>
+                <Text style={s.cardTitle}>{item.judul}</Text>
+                <View style={s.cardActions}>
+                  <TouchableOpacity onPress={() => openEdit(item)} style={s.iconBtn}>
+                    <Ionicons name="pencil" size={17} color={Colors.primary} />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDelete(item)} style={styles.iconBtn}>
-                    <Ionicons name="trash" size={18} color={Colors.danger} />
+                  <TouchableOpacity onPress={() => handleDelete(item)} style={s.iconBtn}>
+                    <Ionicons name="trash" size={17} color={Colors.danger} />
                   </TouchableOpacity>
                 </View>
               </View>
-              <Text style={styles.cardTitle}>{item.judul}</Text>
-              <Text style={styles.cardModul}>{item.modul}</Text>
-              <View style={styles.infoRow}>
-                <View style={styles.infoItem}>
+              <View style={s.infoRow}>
+                <View style={s.infoItem}>
+                  <Ionicons name="document-text-outline" size={13} color={Colors.muted} />
+                  <Text style={s.infoText}>{item.jumlah_soal} soal</Text>
+                </View>
+                <View style={s.infoItem}>
                   <Ionicons name="time-outline" size={13} color={Colors.muted} />
-                  <Text style={styles.infoText}>{item.durasi_menit} menit</Text>
+                  <Text style={s.infoText}>{item.durasi_menit} menit</Text>
                 </View>
-                <View style={styles.infoItem}>
-                  <Ionicons name="refresh-outline" size={13} color={Colors.muted} />
-                  <Text style={styles.infoText}>Max {item.max_retake}x</Text>
-                </View>
-                <View style={styles.infoItem}>
+                <View style={s.infoItem}>
                   <Ionicons name="calendar-outline" size={13} color={Colors.muted} />
-                  <Text style={styles.infoText}>{deadlineStr}</Text>
+                  <Text style={s.infoText}>{deadline}</Text>
                 </View>
               </View>
-              <View style={styles.statsRow}>
-                <View style={styles.statChip}>
-                  <Text style={styles.statNum}>{item.total_peserta}</Text>
-                  <Text style={styles.statLabel}>Peserta</Text>
-                </View>
-                <View style={styles.statChip}>
-                  <Text style={styles.statNum}>{item.total_sesi}</Text>
-                  <Text style={styles.statLabel}>Sesi</Text>
-                </View>
-              </View>
+              <TouchableOpacity
+                style={s.hasilBtn}
+                onPress={() => router.push({ pathname: '/(guru)/assessment/hasil', params: { assessmentId: item.id, judulAssessment: item.judul } })}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="people-outline" size={15} color={Colors.primary} />
+                <Text style={s.hasilBtnText}>Lihat Hasil — {item.total_peserta} peserta</Text>
+                <Ionicons name="chevron-forward" size={15} color={Colors.primary} />
+              </TouchableOpacity>
             </View>
           );
         })}
         <View style={{ height: 24 }} />
       </ScrollView>
 
-      {/* Modal Create / Edit */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.overlay}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editTarget ? 'Edit Assessment' : 'Buat Assessment'}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+      {/* Form Modal */}
+      <Modal visible={formVisible} animationType="slide" transparent>
+        <View style={s.overlay}>
+          <View style={s.modalBox}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>{editTarget ? 'Edit Assessment' : 'Buat Assessment'}</Text>
+              <TouchableOpacity onPress={() => setFormVisible(false)}>
                 <Ionicons name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-              <Text style={styles.fieldLabel}>Judul Assessment *</Text>
-              <TextInput
-                style={styles.input}
-                value={form.judul}
+              <Text style={s.fieldLabel}>Judul *</Text>
+              <TextInput style={s.input} value={form.judul}
                 onChangeText={v => setForm(f => ({ ...f, judul: v }))}
-                placeholder="Contoh: Ujian Geometri Analitik Gasal 2026"
-                placeholderTextColor={Colors.muted}
-              />
+                placeholder="Contoh: Ujian Geometri Analitik" placeholderTextColor={Colors.muted} />
 
-              <Text style={styles.fieldLabel}>Modul *</Text>
-              <TouchableOpacity style={styles.pickerBtn} onPress={() => setModulPickerVisible(true)}>
-                <Text style={[styles.pickerText, !selectedModul && { color: Colors.muted }]}>
-                  {selectedModul ? `${selectedModul.judul} (${selectedModul.nama_mapel})` : 'Pilih modul...'}
+              <Text style={s.fieldLabel}>Durasi (menit) *</Text>
+              <TextInput style={s.input} value={form.durasi_menit}
+                onChangeText={v => setForm(f => ({ ...f, durasi_menit: v.replace(/[^0-9]/g, '') }))}
+                keyboardType="numeric" placeholder="30" placeholderTextColor={Colors.muted} />
+
+              <Text style={s.fieldLabel}>Deadline (YYYY-MM-DD, opsional)</Text>
+              <TextInput style={s.input} value={form.deadline}
+                onChangeText={v => setForm(f => ({ ...f, deadline: v }))}
+                placeholder="2026-08-31" placeholderTextColor={Colors.muted} />
+
+              <Text style={s.fieldLabel}>Soal * ({selectedIds.length} dipilih)</Text>
+              <TouchableOpacity style={s.pickerBtn} onPress={() => setPickerVisible(true)}>
+                <Ionicons name="list-outline" size={16} color={Colors.primary} />
+                <Text style={s.pickerBtnText}>
+                  {selectedIds.length === 0 ? 'Pilih soal...' : `${selectedIds.length} soal dipilih — ubah pilihan`}
                 </Text>
-                <Ionicons name="chevron-down" size={16} color={Colors.muted} />
+                <Ionicons name="chevron-forward" size={16} color={Colors.muted} />
               </TouchableOpacity>
 
-              <Text style={styles.fieldLabel}>Durasi (menit) *</Text>
-              <TextInput
-                style={styles.input}
-                value={form.durasi_menit}
-                onChangeText={v => setForm(f => ({ ...f, durasi_menit: v.replace(/[^0-9]/g, '') }))}
-                keyboardType="numeric"
-                placeholder="30"
-                placeholderTextColor={Colors.muted}
-              />
-
-              <Text style={styles.fieldLabel}>Max Pengulangan</Text>
-              <TextInput
-                style={styles.input}
-                value={form.max_retake}
-                onChangeText={v => setForm(f => ({ ...f, max_retake: v.replace(/[^0-9]/g, '') }))}
-                keyboardType="numeric"
-                placeholder="3"
-                placeholderTextColor={Colors.muted}
-              />
-
-              <Text style={styles.fieldLabel}>Deadline (YYYY-MM-DD, opsional)</Text>
-              <TextInput
-                style={styles.input}
-                value={form.deadline}
-                onChangeText={v => setForm(f => ({ ...f, deadline: v }))}
-                placeholder="2026-08-31"
-                placeholderTextColor={Colors.muted}
-              />
-
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving} activeOpacity={0.85}>
-                {saving
-                  ? <ActivityIndicator color="#fff" />
-                  : <Text style={styles.saveBtnText}>{editTarget ? 'Simpan Perubahan' : 'Buat Assessment'}</Text>
-                }
+              <TouchableOpacity style={s.saveBtn} onPress={handleSave} disabled={saving} activeOpacity={0.85}>
+                {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.saveBtnText}>{editTarget ? 'Simpan Perubahan' : 'Buat Assessment'}</Text>}
               </TouchableOpacity>
               <View style={{ height: 24 }} />
             </ScrollView>
@@ -250,28 +216,42 @@ export default function GuruAssessment() {
         </View>
       </Modal>
 
-      {/* Modul Picker */}
-      <Modal visible={modulPickerVisible} animationType="slide" transparent>
-        <View style={styles.overlay}>
-          <View style={[styles.modalBox, { maxHeight: '70%' }]}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Pilih Modul</Text>
-              <TouchableOpacity onPress={() => setModulPickerVisible(false)}>
-                <Ionicons name="close" size={24} color={Colors.text} />
+      {/* Soal Picker Modal */}
+      <Modal visible={pickerVisible} animationType="slide" transparent>
+        <View style={s.overlay}>
+          <View style={[s.modalBox, { maxHeight: '80%' }]}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>Pilih Soal ({selectedIds.length})</Text>
+              <TouchableOpacity onPress={() => setPickerVisible(false)}>
+                <Ionicons name="checkmark" size={24} color={Colors.primary} />
               </TouchableOpacity>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {modulList.map(m => (
-                <TouchableOpacity
-                  key={m.id}
-                  style={[styles.modulItem, String(form.modul_id) === String(m.id) && styles.modulItemSelected]}
-                  onPress={() => { setForm(f => ({ ...f, modul_id: String(m.id) })); setModulPickerVisible(false); }}
-                >
-                  <Text style={styles.modulItemTitle}>{m.judul}</Text>
-                  <Text style={styles.modulItemMapel}>{m.nama_mapel}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            {soalBank.length === 0 ? (
+              <View style={s.empty}>
+                <Text style={s.emptyText}>Belum ada soal di bank soal.{'\n'}Tambahkan soal di menu Kelola Soal.</Text>
+              </View>
+            ) : (
+              <FlatList
+                data={soalBank}
+                keyExtractor={item => item.id.toString()}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item, index }) => {
+                  const selected = selectedIds.includes(item.id);
+                  return (
+                    <TouchableOpacity style={[s.soalPickerItem, selected && s.soalPickerItemSelected]}
+                      onPress={() => toggleSoal(item.id)} activeOpacity={0.7}>
+                      <View style={[s.checkbox, selected && s.checkboxChecked]}>
+                        {selected && <Ionicons name="checkmark" size={14} color="#fff" />}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.soalPickerNum}>Soal #{soalBank.length - index}</Text>
+                        <Text style={s.soalPickerText} numberOfLines={2}>{item.pertanyaan}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            )}
           </View>
         </View>
       </Modal>
@@ -279,73 +259,41 @@ export default function GuruAssessment() {
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 16, paddingTop: 12, backgroundColor: Colors.card,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 12, backgroundColor: Colors.card, borderBottomWidth: 1, borderBottomColor: Colors.border },
   headerTitle: { fontSize: 18, fontWeight: '800', color: Colors.text },
-  addBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: Colors.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8,
-  },
+  addBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   listContent: { padding: 16 },
-  empty: { alignItems: 'center', paddingTop: 60 },
+  empty: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 20 },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { textAlign: 'center', color: Colors.muted, lineHeight: 22 },
-  card: {
-    backgroundColor: Colors.card, borderRadius: 14, padding: 16,
-    marginBottom: 12, elevation: 2,
-  },
-  cardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  mapelDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
-  mapelText: { fontSize: 12, fontWeight: '700', flex: 1 },
+  card: { backgroundColor: Colors.card, borderRadius: 14, padding: 16, marginBottom: 12, elevation: 2 },
+  cardTop: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
+  cardTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: Colors.text, lineHeight: 20 },
   cardActions: { flexDirection: 'row', gap: 4 },
   iconBtn: { padding: 6 },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: Colors.text, marginBottom: 2 },
-  cardModul: { fontSize: 12, color: Colors.muted, marginBottom: 10 },
-  infoRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', marginBottom: 10 },
+  infoRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', marginBottom: 12 },
   infoItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   infoText: { fontSize: 12, color: Colors.muted },
-  statsRow: { flexDirection: 'row', gap: 10 },
-  statChip: {
-    flex: 1, backgroundColor: Colors.primary + '15', borderRadius: 8,
-    paddingVertical: 8, alignItems: 'center',
-  },
-  statNum: { fontSize: 18, fontWeight: '800', color: Colors.primary },
-  statLabel: { fontSize: 10, color: Colors.muted, marginTop: 2 },
+  hasilBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, backgroundColor: Colors.primary + '12', borderRadius: 10 },
+  hasilBtnText: { flex: 1, fontSize: 13, fontWeight: '600', color: Colors.primary },
   overlay: { flex: 1, backgroundColor: '#00000060', justifyContent: 'flex-end' },
-  modalBox: {
-    backgroundColor: Colors.card, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 20, paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-  },
+  modalBox: { backgroundColor: Colors.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   modalTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
   fieldLabel: { fontSize: 13, fontWeight: '600', color: Colors.text, marginBottom: 6, marginTop: 14 },
-  input: {
-    borderWidth: 1.5, borderColor: Colors.border, borderRadius: 10,
-    paddingHorizontal: 14, paddingVertical: 12, fontSize: 14,
-    color: Colors.text, backgroundColor: Colors.background,
-  },
-  pickerBtn: {
-    borderWidth: 1.5, borderColor: Colors.border, borderRadius: 10,
-    paddingHorizontal: 14, paddingVertical: 12, flexDirection: 'row',
-    justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.background,
-  },
-  pickerText: { fontSize: 14, color: Colors.text, flex: 1 },
-  saveBtn: {
-    backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 14,
-    alignItems: 'center', marginTop: 24,
-  },
+  input: { borderWidth: 1.5, borderColor: Colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: Colors.text, backgroundColor: Colors.background },
+  pickerBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: Colors.primary, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: Colors.primary + '08' },
+  pickerBtnText: { flex: 1, fontSize: 14, color: Colors.primary, fontWeight: '600' },
+  saveBtn: { backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 24 },
   saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  modulItem: {
-    padding: 14, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  modulItemSelected: { backgroundColor: Colors.primary + '15' },
-  modulItemTitle: { fontSize: 14, fontWeight: '600', color: Colors.text },
-  modulItemMapel: { fontSize: 12, color: Colors.muted, marginTop: 2 },
+  soalPickerItem: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  soalPickerItemSelected: { backgroundColor: Colors.primary + '08' },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: Colors.border, justifyContent: 'center', alignItems: 'center' },
+  checkboxChecked: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  soalPickerNum: { fontSize: 10, color: Colors.muted, fontWeight: '600', marginBottom: 2 },
+  soalPickerText: { fontSize: 13, color: Colors.text, lineHeight: 18 },
 });
