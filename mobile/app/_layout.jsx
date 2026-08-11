@@ -12,7 +12,6 @@ export default function RootLayout() {
           <Stack.Screen name="login" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(guru)" />
-          <Stack.Screen name="assessment/[id]" />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>
