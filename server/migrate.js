@@ -23,9 +23,13 @@ async function migrate() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
 
-  // Kolom-kolom di hasil_assessment
+  // Ubah status dari ENUM ke VARCHAR agar bisa pakai nilai 'berlangsung'/'selesai'
+  try {
+    await pool.query(`ALTER TABLE hasil_assessment MODIFY COLUMN status VARCHAR(20) DEFAULT 'berlangsung'`);
+  } catch (e) { /* abaikan jika sudah VARCHAR */ }
+
+  // Kolom tambahan di hasil_assessment
   const haColumns = [
-    { col: 'status',       sql: "ADD COLUMN status VARCHAR(20) DEFAULT 'berlangsung'" },
     { col: 'percobaan_ke', sql: 'ADD COLUMN percobaan_ke INT DEFAULT 1' },
     { col: 'terlambat',    sql: 'ADD COLUMN terlambat TINYINT(1) DEFAULT 0' },
   ];

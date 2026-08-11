@@ -59,13 +59,14 @@ router.get('/:id/soal', verifyToken, async (req, res) => {
       sesiId = result.insertId;
     }
 
-    // Ambil soal dari assessment_soal
+    // Ambil soal dari assessment_soal, acak dan ambil maks 10
     const [soal] = await pool.query(`
       SELECT s.id, s.pertanyaan, s.opsi_a, s.opsi_b, s.opsi_c, s.opsi_d
       FROM assessment_soal aso
       JOIN soal s ON aso.soal_id = s.id
       WHERE aso.assessment_id = ?
-      ORDER BY aso.urutan, aso.soal_id
+      ORDER BY RAND()
+      LIMIT 10
     `, [assessmentId]);
 
     res.json({ sesi_id: sesiId, soal, durasi_menit: assessment.durasi_menit, judul: assessment.judul });
