@@ -10,10 +10,12 @@ import { bulkCreateSoal } from '../../../services/api';
 import Colors from '../../../constants/Colors';
 
 const EXAMPLE =
-  'Siapa proklamator kemerdekaan Indonesia?\nSoekarno dan Hatta*\nSoeharto dan Habibie\nSoekarno dan Megawati\nHabibie dan Wahid\n\nBerapakah nilai dari 2 + 2?\n3\n4*\n5\n6';
+  'Siapa proklamator kemerdekaan Indonesia?\nA. Soekarno dan Hatta*\nB. Soeharto dan Habibie\nC. Soekarno dan Megawati\nD. Habibie dan Wahid\n//\nDiketahui titik A(2,3) dan B(4,7)\npada bidang koordinat. Berapakah jarak AB?\nA. 2√5\nB. 4√5*\nC. 2√10\nD. 4√10';
+
+const OPSI_PREFIX = /^[A-D]\.\s*/i;
 
 function parseInput(raw) {
-  const blocks = raw.trim().split(/\n[ \t]*\n/);
+  const blocks = raw.trim().split(/\n\/\/\n?/);
   const soal = [];
   const errors = [];
 
@@ -21,17 +23,28 @@ function parseInput(raw) {
     const lines = block.trim().split('\n').map(l => l.trim()).filter(Boolean);
     const num = idx + 1;
 
-    if (lines.length < 5) {
-      errors.push(`Soal ke-${num}: harus 5 baris (pertanyaan + 4 opsi), ditemukan ${lines.length} baris`);
+    const firstOpsiIdx = lines.findIndex(l => OPSI_PREFIX.test(l));
+
+    if (firstOpsiIdx === -1) {
+      errors.push(`Soal ke-${num}: opsi tidak ditemukan — tulis opsi diawali A. B. C. D.`);
+      return;
+    }
+    if (firstOpsiIdx === 0) {
+      errors.push(`Soal ke-${num}: pertanyaan tidak ditemukan`);
       return;
     }
 
-    const pertanyaan = lines[0];
-    const opsiLines = lines.slice(1, 5);
-    const starCount = opsiLines.filter(o => o.endsWith('*')).length;
+    const pertanyaan = lines.slice(0, firstOpsiIdx).join(' ');
+    const opsiLines = lines.slice(firstOpsiIdx);
 
+    if (opsiLines.length !== 4) {
+      errors.push(`Soal ke-${num}: harus tepat 4 opsi (A–D), ditemukan ${opsiLines.length}`);
+      return;
+    }
+
+    const starCount = opsiLines.filter(o => o.endsWith('*')).length;
     if (starCount === 0) {
-      errors.push(`Soal ke-${num}: tidak ditemukan jawaban benar — tandai opsi dengan * di akhir`);
+      errors.push(`Soal ke-${num}: tidak ada jawaban benar — tandai opsi dengan * di akhir`);
       return;
     }
     if (starCount > 1) {
@@ -42,8 +55,9 @@ function parseInput(raw) {
     const keys = ['a', 'b', 'c', 'd'];
     const parsed = { pertanyaan, jawaban_benar: '' };
     opsiLines.forEach((o, i) => {
-      const correct = o.endsWith('*');
-      parsed[`opsi_${keys[i]}`] = correct ? o.slice(0, -1).trim() : o;
+      const text = o.replace(OPSI_PREFIX, '');
+      const correct = text.endsWith('*');
+      parsed[`opsi_${keys[i]}`] = correct ? text.slice(0, -1).trim() : text;
       if (correct) parsed.jawaban_benar = keys[i];
     });
 
@@ -160,7 +174,7 @@ export default function BulkSoal() {
           <View style={s.infoBox}>
             <Text style={s.infoTitle}>Format Penulisan</Text>
             <Text style={s.infoText}>
-              {'• Baris 1: Pertanyaan\n• Baris 2–5: Opsi A, B, C, D\n• Tandai jawaban benar dengan * di akhir opsi\n• Pisahkan tiap soal dengan 1 baris kosong'}
+              {'• Tulis pertanyaan (boleh lebih dari 1 baris)\n• Lanjut opsi diawali A. B. C. D.\n• Tandai jawaban benar dengan * di akhir opsi\n• Pisahkan tiap soal dengan //'}
             </Text>
             <View style={s.exampleBox}>
               <Text style={s.exampleCode}>{EXAMPLE}</Text>
@@ -174,7 +188,7 @@ export default function BulkSoal() {
             onChangeText={setText}
             multiline
             placeholder={
-              'Pertanyaan soal pertama\nOpsi A\nOpsi B benar*\nOpsi C\nOpsi D\n\nPertanyaan soal kedua\n...'
+              'Pertanyaan soal pertama\nboleh lebih dari satu baris\nA. Opsi A\nB. Opsi B benar*\nC. Opsi C\nD. Opsi D\n//\nPertanyaan soal kedua\n...'
             }
             placeholderTextColor={Colors.muted}
             textAlignVertical="top"
