@@ -317,7 +317,7 @@ export default function GuruStatistik() {
                         </Text>
                       </View>
                       <View style={styles.sesiRight}>
-                        <Text style={[styles.sesiSkor, { color: statusColor }]}>{sesi.skor?.toFixed(0)}%</Text>
+                        <Text style={[styles.sesiSkor, { color: statusColor }]}>{Math.round(parseFloat(sesi.skor) || 0)}%</Text>
                         <View style={[styles.statusPill, { backgroundColor: statusColor + '22' }]}>
                           <Text style={[styles.statusPillText, { color: statusColor }]}>
                             {sesi.status === 'lulus' ? 'Lulus' : sesi.status === 'remedial' ? 'Remedial' : 'Tidak Lulus'}

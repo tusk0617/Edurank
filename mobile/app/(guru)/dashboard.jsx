@@ -158,6 +158,28 @@ export default function GuruDashboard() {
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/assessment')} activeOpacity={0.85}>
+          <View style={[styles.menuIcon, { backgroundColor: '#EBF4FF' }]}>
+            <Ionicons name="clipboard" size={28} color={Colors.primary} />
+          </View>
+          <View style={styles.menuInfo}>
+            <Text style={styles.menuTitle}>Kelola Assessment</Text>
+            <Text style={styles.menuDesc}>Buat, edit, dan hapus ujian untuk siswa</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/activity-log')} activeOpacity={0.85}>
+          <View style={[styles.menuIcon, { backgroundColor: '#FFF0F0' }]}>
+            <Ionicons name="alert-circle" size={28} color={Colors.danger} />
+          </View>
+          <View style={styles.menuInfo}>
+            <Text style={styles.menuTitle}>Activity Log</Text>
+            <Text style={styles.menuDesc}>Rekam jejak pelanggaran siswa saat mengerjakan ujian</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
+        </TouchableOpacity>
+
         {/* Ganti Password */}
         <TouchableOpacity style={styles.gantiPassBtn} onPress={() => setGantiPassModal(true)} activeOpacity={0.8}>
           <Ionicons name="lock-closed-outline" size={20} color={Colors.primary} />

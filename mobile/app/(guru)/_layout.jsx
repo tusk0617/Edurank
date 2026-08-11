@@ -55,6 +55,8 @@ export default function GuruLayout() {
         name="soal/[modulId]"
         options={{ href: null, tabBarStyle: { display: 'none' } }}
       />
+      <Tabs.Screen name="assessment/index" options={{ href: null }} />
+      <Tabs.Screen name="activity-log" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -332,4 +332,103 @@ router.get('/statistik/siswa/:id', ...guruOnly, async (req, res) => {
   }
 });
 
+// ─── ASSESSMENT MANAGEMENT ────────────────────────────────────────────────────
+
+// GET /api/guru/assessment
+router.get('/assessment', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT a.id, a.judul, a.deadline, a.durasi_menit, a.max_retake,
+             m.id AS modul_id, m.judul AS modul, mp.nama AS mapel, mp.warna_hex,
+             COUNT(DISTINCT ha.user_id) AS total_peserta,
+             COUNT(DISTINCT ha.id) AS total_sesi
+      FROM assessment a
+      JOIN modul m ON a.modul_id = m.id
+      JOIN mata_pelajaran mp ON m.mapel_id = mp.id
+      LEFT JOIN hasil_assessment ha ON ha.assessment_id = a.id
+      GROUP BY a.id, a.judul, a.deadline, a.durasi_menit, a.max_retake, m.id, m.judul, mp.nama, mp.warna_hex
+      ORDER BY a.id DESC`);
+    res.json(rows);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// POST /api/guru/assessment
+router.post('/assessment', ...guruOnly, async (req, res) => {
+  const { judul, modul_id, deadline, durasi_menit, max_retake } = req.body;
+  if (!judul || !modul_id || !durasi_menit) {
+    return res.status(400).json({ message: 'Judul, modul, dan durasi wajib diisi' });
+  }
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO assessment (judul, modul_id, deadline, durasi_menit, max_retake, potongan_terlambat) VALUES (?,?,?,?,?,5)',
+      [judul, modul_id, deadline || null, durasi_menit, max_retake || 3]
+    );
+    res.status(201).json({ message: 'Assessment berhasil dibuat', id: result.insertId });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// PUT /api/guru/assessment/:id
+router.put('/assessment/:id', ...guruOnly, async (req, res) => {
+  const { judul, deadline, durasi_menit, max_retake } = req.body;
+  try {
+    await pool.query(
+      'UPDATE assessment SET judul=?, deadline=?, durasi_menit=?, max_retake=? WHERE id=?',
+      [judul, deadline || null, durasi_menit, max_retake, req.params.id]
+    );
+    res.json({ message: 'Assessment berhasil diperbarui' });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// DELETE /api/guru/assessment/:id
+router.delete('/assessment/:id', ...guruOnly, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM assessment WHERE id=?', [req.params.id]);
+    res.json({ message: 'Assessment berhasil dihapus' });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// ─── ACTIVITY LOG ─────────────────────────────────────────────────────────────
+
+// GET /api/guru/activity-log — ringkasan pelanggaran per sesi
+router.get('/activity-log', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT ha.id AS hasil_id, u.nama AS siswa, u.username,
+             a.judul AS assessment, mp.nama AS mapel, mp.warna_hex,
+             COUNT(al.id) AS total_pelanggaran,
+             MIN(al.waktu) AS pertama_kali,
+             ha.skor, ha.status, ha.waktu_mulai, ha.waktu_selesai
+      FROM hasil_assessment ha
+      JOIN users u ON ha.user_id = u.id
+      JOIN assessment a ON ha.assessment_id = a.id
+      JOIN modul m ON a.modul_id = m.id
+      JOIN mata_pelajaran mp ON m.mapel_id = mp.id
+      LEFT JOIN activity_log al ON al.hasil_id = ha.id AND al.jenis = 'tab_switch'
+      GROUP BY ha.id, u.nama, u.username, a.judul, mp.nama, mp.warna_hex, ha.skor, ha.status, ha.waktu_mulai, ha.waktu_selesai
+      HAVING total_pelanggaran > 0
+      ORDER BY total_pelanggaran DESC, ha.waktu_mulai DESC`);
+    res.json(rows);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// GET /api/guru/activity-log/:hasilId — detail log per sesi
+router.get('/activity-log/:hasilId', ...guruOnly, async (req, res) => {
+  try {
+    const [[sesi]] = await pool.query(`
+      SELECT ha.id, u.nama AS siswa, a.judul AS assessment,
+             ha.waktu_mulai, ha.waktu_selesai, ha.skor, ha.status
+      FROM hasil_assessment ha
+      JOIN users u ON ha.user_id = u.id
+      JOIN assessment a ON ha.assessment_id = a.id
+      WHERE ha.id = ?`, [req.params.hasilId]);
+    if (!sesi) return res.status(404).json({ message: 'Sesi tidak ditemukan' });
+
+    const [logs] = await pool.query(
+      'SELECT id, jenis, waktu, keterangan FROM activity_log WHERE hasil_id = ? ORDER BY waktu ASC',
+      [req.params.hasilId]
+    );
+    res.json({ sesi, logs });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
 module.exports = router;

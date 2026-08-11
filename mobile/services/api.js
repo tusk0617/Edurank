@@ -63,10 +63,11 @@ export const login = (username, password) => api.post('/api/auth/login', { usern
 export const register = (data) => api.post('/api/auth/register', data);
 export const getMe = () => api.get('/api/auth/me');
 
-// Assessment
+// Assessment (siswa)
 export const getAssessment = () => api.get('/api/assessment');
 export const getSoal = (id) => api.get(`/api/assessment/${id}/soal`);
 export const submitAssessment = (id, data) => api.post(`/api/assessment/${id}/submit`, data);
+export const logActivity = (id, data) => api.post(`/api/assessment/${id}/activity`, data);
 
 // Guru
 export const getGuruSoal = () => api.get('/api/guru/soal');
@@ -83,6 +84,14 @@ export const getGuruGapModulSoal = (id) => api.get(`/api/guru/gap/modul/${id}`);
 // Statistik guru
 export const getGuruStatistikSoal = () => api.get('/api/guru/statistik/soal');
 export const getGuruStatistikSiswa = (userId) => api.get(`/api/guru/statistik/siswa/${userId}`);
+// Assessment guru (CRUD)
+export const getGuruAssessment = () => api.get('/api/guru/assessment');
+export const createAssessment = (data) => api.post('/api/guru/assessment', data);
+export const updateAssessment = (id, data) => api.put(`/api/guru/assessment/${id}`, data);
+export const deleteAssessment = (id) => api.delete(`/api/guru/assessment/${id}`);
+// Activity log guru
+export const getGuruActivityLog = () => api.get('/api/guru/activity-log');
+export const getGuruActivityLogDetail = (hasilId) => api.get(`/api/guru/activity-log/${hasilId}`);
 // Auth actions
 export const changePassword = (data) => api.put('/api/auth/change-password', data);
 

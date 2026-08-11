@@ -173,4 +173,20 @@ router.post('/:id/submit', verifyToken, async (req, res) => {
   }
 });
 
+// POST /api/assessment/:id/activity — log aktivitas siswa (tab switch, dll)
+router.post('/:id/activity', verifyToken, async (req, res) => {
+  const { sesi_id, jenis, keterangan } = req.body;
+  if (!sesi_id || !jenis) return res.status(400).json({ message: 'Data tidak lengkap' });
+  try {
+    await pool.query(
+      'INSERT INTO activity_log (hasil_id, jenis, keterangan) VALUES (?, ?, ?)',
+      [sesi_id, jenis, keterangan || null]
+    );
+    res.json({ message: 'ok' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

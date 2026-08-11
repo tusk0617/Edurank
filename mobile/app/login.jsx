@@ -15,13 +15,12 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
-  // Jika sudah ada sesi guru yang tersimpan, langsung redirect
+  // Redirect jika sudah login
   useEffect(() => {
     if (isLoggedIn && currentUser?.role === 'guru') {
       router.replace('/(guru)/dashboard');
     } else if (isLoggedIn && currentUser?.role === 'siswa') {
-      // Hapus sesi siswa yang mungkin tersisa dari sebelum UI dihapus
-      logout();
+      router.replace('/(tabs)/home');
     }
   }, [isLoggedIn, currentUser]);
 
@@ -37,13 +36,7 @@ export default function LoginScreen() {
       if (loggedUser.role === 'guru') {
         router.replace('/(guru)/dashboard');
       } else {
-        // Hapus token siswa langsung — prototype hanya untuk guru
-        await logout();
-        Alert.alert(
-          'Akses Terbatas',
-          'Prototype ini saat ini hanya tersedia untuk guru.\n\nGunakan akun G001–G010 dengan password: password123',
-          [{ text: 'OK' }]
-        );
+        router.replace('/(tabs)/home');
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal login. Periksa koneksi internet.';
@@ -110,8 +103,8 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Info Login (Prototype Guru):</Text>
-            <Text style={styles.demoText}>Guru: G001–G010</Text>
+            <Text style={styles.demoTitle}>Info Login:</Text>
+            <Text style={styles.demoText}>Siswa: S001–S035  |  Guru: G001–G010</Text>
             <Text style={styles.demoText}>Password: password123</Text>
           </View>
         </View>
