@@ -80,6 +80,9 @@ export const getGuruGap = () => api.get('/api/guru/gap');
 export const getGuruGapSiswa = () => api.get('/api/guru/gap/siswa');
 export const getGuruGapModul = () => api.get('/api/guru/gap/modul');
 export const getGuruGapModulSoal = (id) => api.get(`/api/guru/gap/modul/${id}`);
+// Statistik guru
+export const getGuruStatistikSoal = () => api.get('/api/guru/statistik/soal');
+export const getGuruStatistikSiswa = (userId) => api.get(`/api/guru/statistik/siswa/${userId}`);
 // Auth actions
 export const changePassword = (data) => api.put('/api/auth/change-password', data);
 

@@ -271,4 +271,65 @@ router.get('/gap', ...guruOnly, async (req, res) => {
   }
 });
 
+// GET /api/guru/statistik/soal — success/failure % per soal, sorted by persen_benar ASC
+router.get('/statistik/soal', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         s.id,
+         LEFT(s.pertanyaan, 120) AS pertanyaan,
+         m.judul AS modul,
+         mp.nama AS mapel,
+         mp.warna_hex,
+         COUNT(js.id) AS total_dijawab,
+         SUM(CASE WHEN js.benar = 1 THEN 1 ELSE 0 END) AS total_benar,
+         SUM(CASE WHEN js.benar = 0 THEN 1 ELSE 0 END) AS total_salah,
+         ROUND(SUM(CASE WHEN js.benar = 1 THEN 1 ELSE 0 END) / COUNT(js.id) * 100, 1) AS persen_benar,
+         ROUND(SUM(CASE WHEN js.benar = 0 THEN 1 ELSE 0 END) / COUNT(js.id) * 100, 1) AS persen_salah
+       FROM soal s
+       JOIN modul m ON s.modul_id = m.id
+       JOIN mata_pelajaran mp ON m.mapel_id = mp.id
+       LEFT JOIN jawaban_siswa js ON js.soal_id = s.id
+       GROUP BY s.id, s.pertanyaan, m.judul, mp.nama, mp.warna_hex
+       HAVING total_dijawab > 0
+       ORDER BY persen_benar ASC`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/guru/statistik/siswa/:id — detail jawaban per siswa, dikelompokkan per sesi
+router.get('/statistik/siswa/:id', ...guruOnly, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         ha.id AS sesi_id,
+         a.judul AS assessment,
+         ha.waktu_selesai,
+         ha.skor,
+         ha.percobaan_ke,
+         ha.status,
+         s.id AS soal_id,
+         LEFT(s.pertanyaan, 120) AS pertanyaan,
+         js.jawaban_dipilih,
+         js.benar,
+         s.jawaban_benar
+       FROM hasil_assessment ha
+       JOIN assessment a ON ha.assessment_id = a.id
+       JOIN jawaban_siswa js ON js.hasil_id = ha.id
+       JOIN soal s ON js.soal_id = s.id
+       WHERE ha.user_id = ?
+       ORDER BY ha.waktu_selesai DESC, ha.id, s.id`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

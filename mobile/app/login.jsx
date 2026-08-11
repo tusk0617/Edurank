@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ScrollView,
@@ -8,12 +8,22 @@ import { useAuth } from '../context/AuthContext';
 import Colors from '../constants/Colors';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, logout, isLoggedIn, user: currentUser } = useAuth();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+
+  // Jika sudah ada sesi guru yang tersimpan, langsung redirect
+  useEffect(() => {
+    if (isLoggedIn && currentUser?.role === 'guru') {
+      router.replace('/(guru)/dashboard');
+    } else if (isLoggedIn && currentUser?.role === 'siswa') {
+      // Hapus sesi siswa yang mungkin tersisa dari sebelum UI dihapus
+      logout();
+    }
+  }, [isLoggedIn, currentUser]);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -27,7 +37,13 @@ export default function LoginScreen() {
       if (loggedUser.role === 'guru') {
         router.replace('/(guru)/dashboard');
       } else {
-        router.replace('/(tabs)/home');
+        // Hapus token siswa langsung — prototype hanya untuk guru
+        await logout();
+        Alert.alert(
+          'Akses Terbatas',
+          'Prototype ini saat ini hanya tersedia untuk guru.\n\nGunakan akun G001–G010 dengan password: password123',
+          [{ text: 'OK' }]
+        );
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal login. Periksa koneksi internet.';
@@ -94,8 +110,8 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Info Login:</Text>
-            <Text style={styles.demoText}>Siswa: S001–S035  |  Guru: G001–G010</Text>
+            <Text style={styles.demoTitle}>Info Login (Prototype Guru):</Text>
+            <Text style={styles.demoText}>Guru: G001–G010</Text>
             <Text style={styles.demoText}>Password: password123</Text>
           </View>
         </View>

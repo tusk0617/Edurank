@@ -10,10 +10,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="login" />
-          <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(guru)" />
-<Stack.Screen name="assessment/[id]" />
-          <Stack.Screen name="modul/[id]" />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

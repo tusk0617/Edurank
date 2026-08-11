@@ -45,6 +45,13 @@ export default function GuruLayout() {
         }}
       />
       <Tabs.Screen
+        name="statistik"
+        options={{
+          title: 'Statistik',
+          tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="soal/[modulId]"
         options={{ href: null, tabBarStyle: { display: 'none' } }}
       />
