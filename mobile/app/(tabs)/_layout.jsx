@@ -21,6 +21,7 @@ export default function SiswaTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="profil" options={{ href: null }} />
     </Tabs>
   );
 }
