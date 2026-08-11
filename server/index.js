@@ -2,7 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const migrate = require('./migrate');
 const app = express();
+
+migrate().catch(err => console.error('Migration error:', err.message));
 
 const corsOptions = {
   origin: '*',
