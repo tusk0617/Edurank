@@ -20,7 +20,7 @@ export default function LoginScreen() {
     if (isLoggedIn && currentUser?.role === 'guru') {
       router.replace('/(guru)/dashboard');
     } else if (isLoggedIn && currentUser?.role === 'siswa') {
-      router.replace('/(tabs)/home');
+      logout();
     }
   }, [isLoggedIn, currentUser]);
 
@@ -36,7 +36,12 @@ export default function LoginScreen() {
       if (loggedUser.role === 'guru') {
         router.replace('/(guru)/dashboard');
       } else {
-        router.replace('/(tabs)/home');
+        await logout();
+        Alert.alert(
+          'Aplikasi Guru',
+          'Aplikasi ini khusus untuk guru.\n\nSiswa mengakses ujian melalui portal web di browser.',
+          [{ text: 'OK' }]
+        );
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal login. Periksa koneksi internet.';
