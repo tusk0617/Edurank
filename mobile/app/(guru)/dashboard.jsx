@@ -7,13 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
-import { getGuruGap, changePassword } from '../../services/api';
+import { changePassword } from '../../services/api';
 import Colors from '../../constants/Colors';
 
 export default function GuruDashboard() {
   const { user, logout } = useAuth();
-  const [ringkasan, setRingkasan] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [gantiPassModal, setGantiPassModal] = useState(false);
   const [passLama, setPassLama] = useState('');
@@ -25,15 +24,8 @@ export default function GuruDashboard() {
   const [savingPass, setSavingPass] = useState(false);
 
   const fetchData = useCallback(async () => {
-    try {
-      const res = await getGuruGap();
-      setRingkasan(res.data.ringkasan);
-    } catch {
-      setRingkasan(null);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
@@ -104,24 +96,6 @@ export default function GuruDashboard() {
           </TouchableOpacity>
         </View>
 
-        {/* Stats */}
-        {ringkasan && (
-          <View style={styles.statsRow}>
-            <View style={[styles.statCard, { borderLeftColor: Colors.primary }]}>
-              <Text style={styles.statNum}>{ringkasan.total_soal}</Text>
-              <Text style={styles.statLabel}>Total Soal</Text>
-            </View>
-            <View style={[styles.statCard, { borderLeftColor: Colors.primary }]}>
-              <Text style={styles.statNum}>{ringkasan.total_siswa}</Text>
-              <Text style={styles.statLabel}>Total Siswa</Text>
-            </View>
-            <View style={[styles.statCard, { borderLeftColor: Colors.warning }]}>
-              <Text style={styles.statNum}>{ringkasan.total_jawaban}</Text>
-              <Text style={styles.statLabel}>Total Jawaban</Text>
-            </View>
-          </View>
-        )}
-
         {/* Menu */}
         <Text style={styles.sectionTitle}>Menu Utama</Text>
 
@@ -132,17 +106,6 @@ export default function GuruDashboard() {
           <View style={styles.menuInfo}>
             <Text style={styles.menuTitle}>Kelola Soal</Text>
             <Text style={styles.menuDesc}>Tambah, edit, dan hapus soal ujian per modul</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/gap')} activeOpacity={0.85}>
-          <View style={[styles.menuIcon, { backgroundColor: '#EBF4FF' }]}>
-            <Ionicons name="bar-chart" size={28} color={Colors.primary} />
-          </View>
-          <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>Gap Analisis</Text>
-            <Text style={styles.menuDesc}>Persentase kesalahan siswa per mata pelajaran</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>
@@ -274,13 +237,6 @@ const styles = StyleSheet.create({
   },
   roleText: { fontSize: 10, fontWeight: '700', color: '#fff', letterSpacing: 1 },
   logoutBtn: { padding: 8 },
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  statCard: {
-    flex: 1, backgroundColor: Colors.card, borderRadius: 12, padding: 14,
-    borderLeftWidth: 3, elevation: 2,
-  },
-  statNum: { fontSize: 22, fontWeight: '800', color: Colors.text },
-  statLabel: { fontSize: 11, color: Colors.muted, marginTop: 2 },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: Colors.muted, marginBottom: 12, letterSpacing: 0.5 },
   menuCard: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.card,

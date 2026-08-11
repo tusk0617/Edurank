@@ -38,13 +38,6 @@ export default function GuruLayout() {
         }}
       />
       <Tabs.Screen
-        name="gap"
-        options={{
-          title: 'Gap Analisis',
-          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="statistik"
         options={{
           title: 'Statistik',
