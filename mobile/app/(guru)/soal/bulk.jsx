@@ -10,7 +10,7 @@ import { bulkCreateSoal } from '../../../services/api';
 import Colors from '../../../constants/Colors';
 
 const EXAMPLE =
-  'Siapa proklamator kemerdekaan Indonesia?\nA. Soekarno dan Hatta*\nB. Soeharto dan Habibie\nC. Soekarno dan Megawati\nD. Habibie dan Wahid\n---\nDiketahui titik A(2,3) dan B(4,7)\npada bidang koordinat. Berapakah jarak AB?\nA. 2√5\nB. 4√5*\nC. 2√10\nD. 4√10';
+  'Siapa proklamator kemerdekaan Indonesia?\n//\nA. Soekarno dan Hatta*\nB. Soeharto dan Habibie\nC. Soekarno dan Megawati\nD. Habibie dan Wahid\n---\nDiketahui titik A(2,3) dan B(4,7)\npada bidang koordinat. Berapakah jarak AB?\n//\nA. 2√5\nB. 4√5*\nC. 2√10\nD. 4√10';
 
 const OPSI_PREFIX = /^[A-D]\.\s*/i;
 
@@ -20,22 +20,21 @@ function parseInput(raw) {
   const errors = [];
 
   blocks.forEach((block, idx) => {
-    const lines = block.trim().split('\n').map(l => l.trim()).filter(Boolean);
     const num = idx + 1;
+    const parts = block.trim().split(/\n\/\/\n?/);
 
-    const firstOpsiIdx = lines.findIndex(l => OPSI_PREFIX.test(l));
-
-    if (firstOpsiIdx === -1) {
-      errors.push(`Soal ke-${num}: opsi tidak ditemukan — tulis opsi diawali A. B. C. D.`);
-      return;
-    }
-    if (firstOpsiIdx === 0) {
-      errors.push(`Soal ke-${num}: pertanyaan tidak ditemukan`);
+    if (parts.length < 2) {
+      errors.push(`Soal ke-${num}: pemisah // antara pertanyaan dan opsi tidak ditemukan`);
       return;
     }
 
-    const pertanyaan = lines.slice(0, firstOpsiIdx).join(' ');
-    const opsiLines = lines.slice(firstOpsiIdx);
+    const pertanyaan = parts[0].trim().split('\n').map(l => l.trim()).filter(Boolean).join(' ');
+    if (!pertanyaan) {
+      errors.push(`Soal ke-${num}: pertanyaan tidak boleh kosong`);
+      return;
+    }
+
+    const opsiLines = parts[1].trim().split('\n').map(l => l.trim()).filter(Boolean);
 
     if (opsiLines.length !== 4) {
       errors.push(`Soal ke-${num}: harus tepat 4 opsi (A–D), ditemukan ${opsiLines.length}`);
@@ -174,7 +173,7 @@ export default function BulkSoal() {
           <View style={s.infoBox}>
             <Text style={s.infoTitle}>Format Penulisan</Text>
             <Text style={s.infoText}>
-              {'• Tulis pertanyaan (boleh lebih dari 1 baris)\n• Lanjut opsi diawali A. B. C. D.\n• Tandai jawaban benar dengan * di akhir opsi\n• Pisahkan tiap soal dengan ---'}
+              {'• Tulis pertanyaan (boleh lebih dari 1 baris)\n• Tulis // untuk memisahkan pertanyaan dan opsi\n• Tulis opsi diawali A. B. C. D.\n• Tandai jawaban benar dengan * di akhir opsi\n• Pisahkan tiap soal dengan ---'}
             </Text>
             <View style={s.exampleBox}>
               <Text style={s.exampleCode}>{EXAMPLE}</Text>
@@ -188,7 +187,7 @@ export default function BulkSoal() {
             onChangeText={setText}
             multiline
             placeholder={
-              'Pertanyaan soal pertama\nboleh lebih dari satu baris\nA. Opsi A\nB. Opsi B benar*\nC. Opsi C\nD. Opsi D\n---\nPertanyaan soal kedua\n...'
+              'Pertanyaan soal pertama\nboleh lebih dari satu baris\n//\nA. Opsi A\nB. Opsi B benar*\nC. Opsi C\nD. Opsi D\n---\nPertanyaan soal kedua\n//\nA. ...'
             }
             placeholderTextColor={Colors.muted}
             textAlignVertical="top"
