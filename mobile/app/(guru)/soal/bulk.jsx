@@ -10,12 +10,12 @@ import { bulkCreateSoal } from '../../../services/api';
 import Colors from '../../../constants/Colors';
 
 const EXAMPLE =
-  'Siapa proklamator kemerdekaan Indonesia?\nA. Soekarno dan Hatta*\nB. Soeharto dan Habibie\nC. Soekarno dan Megawati\nD. Habibie dan Wahid\n//\nDiketahui titik A(2,3) dan B(4,7)\npada bidang koordinat. Berapakah jarak AB?\nA. 2√5\nB. 4√5*\nC. 2√10\nD. 4√10';
+  'Siapa proklamator kemerdekaan Indonesia?\nA. Soekarno dan Hatta*\nB. Soeharto dan Habibie\nC. Soekarno dan Megawati\nD. Habibie dan Wahid\n---\nDiketahui titik A(2,3) dan B(4,7)\npada bidang koordinat. Berapakah jarak AB?\nA. 2√5\nB. 4√5*\nC. 2√10\nD. 4√10';
 
 const OPSI_PREFIX = /^[A-D]\.\s*/i;
 
 function parseInput(raw) {
-  const blocks = raw.trim().split(/\n\/\/\n?/);
+  const blocks = raw.trim().split(/\n---\n?/);
   const soal = [];
   const errors = [];
 
@@ -174,7 +174,7 @@ export default function BulkSoal() {
           <View style={s.infoBox}>
             <Text style={s.infoTitle}>Format Penulisan</Text>
             <Text style={s.infoText}>
-              {'• Tulis pertanyaan (boleh lebih dari 1 baris)\n• Lanjut opsi diawali A. B. C. D.\n• Tandai jawaban benar dengan * di akhir opsi\n• Pisahkan tiap soal dengan //'}
+              {'• Tulis pertanyaan (boleh lebih dari 1 baris)\n• Lanjut opsi diawali A. B. C. D.\n• Tandai jawaban benar dengan * di akhir opsi\n• Pisahkan tiap soal dengan ---'}
             </Text>
             <View style={s.exampleBox}>
               <Text style={s.exampleCode}>{EXAMPLE}</Text>
@@ -188,7 +188,7 @@ export default function BulkSoal() {
             onChangeText={setText}
             multiline
             placeholder={
-              'Pertanyaan soal pertama\nboleh lebih dari satu baris\nA. Opsi A\nB. Opsi B benar*\nC. Opsi C\nD. Opsi D\n//\nPertanyaan soal kedua\n...'
+              'Pertanyaan soal pertama\nboleh lebih dari satu baris\nA. Opsi A\nB. Opsi B benar*\nC. Opsi C\nD. Opsi D\n---\nPertanyaan soal kedua\n...'
             }
             placeholderTextColor={Colors.muted}
             textAlignVertical="top"
