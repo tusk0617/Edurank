@@ -136,15 +136,13 @@ router.get('/assessment/:id/hasil', ...guruOnly, async (req, res) => {
     if (!assessment) return res.status(404).json({ message: 'Assessment tidak ditemukan' });
 
     const [hasil] = await pool.query(`
-      SELECT ha.id, u.nama, u.username, ha.skor,
+      SELECT ha.id, u.nama, u.username, ha.skor, ha.status,
              ha.waktu_mulai, ha.waktu_selesai,
              TIMESTAMPDIFF(SECOND, ha.waktu_mulai, ha.waktu_selesai) AS durasi_detik,
-             COUNT(al.id) AS total_pelanggaran
+             ha.jumlah_keluar AS total_pelanggaran
       FROM hasil_assessment ha
       JOIN users u ON ha.user_id = u.id
-      LEFT JOIN activity_log al ON al.hasil_id = ha.id AND al.jenis = 'tab_switch'
       WHERE ha.assessment_id = ? AND ha.waktu_selesai IS NOT NULL
-      GROUP BY ha.id, u.nama, u.username, ha.skor, ha.waktu_mulai, ha.waktu_selesai
       ORDER BY ha.skor DESC, ha.waktu_selesai ASC
     `, [req.params.id]);
 
@@ -221,6 +219,37 @@ router.delete('/assessment/:id', ...guruOnly, async (req, res) => {
   } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
 
+// GET /api/guru/hasil/:hasilId/jawaban — detail jawaban siswa per soal
+router.get('/hasil/:hasilId/jawaban', ...guruOnly, async (req, res) => {
+  try {
+    const [[sesi]] = await pool.query(`
+      SELECT ha.id, u.nama, u.username, a.judul AS assessment,
+             ha.skor, ha.status, ha.waktu_mulai, ha.waktu_selesai,
+             TIMESTAMPDIFF(SECOND, ha.waktu_mulai, ha.waktu_selesai) AS durasi_detik,
+             ha.jumlah_keluar AS total_pelanggaran
+      FROM hasil_assessment ha
+      JOIN users u ON ha.user_id = u.id
+      JOIN assessment a ON ha.assessment_id = a.id
+      WHERE ha.id = ?
+    `, [req.params.hasilId]);
+    if (!sesi) return res.status(404).json({ message: 'Tidak ditemukan' });
+
+    const [jawaban] = await pool.query(`
+      SELECT js.soal_id, js.jawaban_dipilih, js.benar,
+             s.pertanyaan, s.opsi_a, s.opsi_b, s.opsi_c, s.opsi_d, s.jawaban_benar, s.bobot_poin
+      FROM jawaban_siswa js
+      JOIN soal s ON js.soal_id = s.id
+      WHERE js.hasil_id = ?
+      ORDER BY js.id ASC
+    `, [req.params.hasilId]);
+
+    res.json({ sesi, jawaban });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // ─── ACTIVITY LOG ─────────────────────────────────────────────────────────────
 
 // GET /api/guru/activity-log — sesi dengan pelanggaran tab switch
@@ -229,16 +258,13 @@ router.get('/activity-log', ...guruOnly, async (req, res) => {
     const [rows] = await pool.query(`
       SELECT ha.id AS hasil_id, u.nama AS siswa, u.username,
              a.judul AS assessment,
-             COUNT(al.id) AS total_pelanggaran,
-             MIN(al.waktu) AS pertama_kali,
+             ha.jumlah_keluar AS total_pelanggaran,
              ha.skor, ha.status, ha.waktu_mulai, ha.waktu_selesai
       FROM hasil_assessment ha
       JOIN users u ON ha.user_id = u.id
       JOIN assessment a ON ha.assessment_id = a.id
-      LEFT JOIN activity_log al ON al.hasil_id = ha.id AND al.jenis = 'tab_switch'
-      GROUP BY ha.id, u.nama, u.username, a.judul, ha.skor, ha.status, ha.waktu_mulai, ha.waktu_selesai
-      HAVING total_pelanggaran > 0
-      ORDER BY total_pelanggaran DESC, ha.waktu_mulai DESC
+      WHERE ha.jumlah_keluar > 0
+      ORDER BY ha.jumlah_keluar DESC, ha.waktu_mulai DESC
     `);
     res.json(rows);
   } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }

@@ -62,6 +62,7 @@ export const deleteSoal     = (id)     => api.delete(`/api/guru/soal/${id}`);
 export const getGuruAssessment       = ()       => api.get('/api/guru/assessment');
 export const getGuruAssessmentSoalIds= (id)     => api.get(`/api/guru/assessment/${id}/soal-ids`);
 export const getGuruAssessmentHasil  = (id)     => api.get(`/api/guru/assessment/${id}/hasil`);
+export const getGuruHasilJawaban     = (id)     => api.get(`/api/guru/hasil/${id}/jawaban`);
 export const createAssessment        = (data)   => api.post('/api/guru/assessment', data);
 export const updateAssessment        = (id, d)  => api.put(`/api/guru/assessment/${id}`, d);
 export const deleteAssessment        = (id)     => api.delete(`/api/guru/assessment/${id}`);
@@ -75,5 +76,7 @@ export const getAssessment    = ()          => api.get('/api/assessment');
 export const getSoal          = (id)        => api.get(`/api/assessment/${id}/soal`);
 export const submitAssessment = (id, data)  => api.post(`/api/assessment/${id}/submit`, data);
 export const logActivity      = (id, data)  => api.post(`/api/assessment/${id}/activity`, data);
+export const logKeluar        = (data)      => api.post('/api/assessment/log-keluar', data);
+export const logKembali       = (logId, d)  => api.patch(`/api/assessment/log-keluar/${logId}`, d);
 
 export default api;

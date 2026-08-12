@@ -24,13 +24,6 @@ export default function GuruLayout() {
       }}
     >
       <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="soal/index"
         options={{
           title: 'Kelola Soal',
@@ -40,14 +33,16 @@ export default function GuruLayout() {
       <Tabs.Screen
         name="activity-log"
         options={{
-          title: 'Activity Log',
+          title: 'Log Pelanggaran',
           tabBarIcon: ({ color, size }) => <Ionicons name="alert-circle" size={size} color={color} />,
         }}
       />
+      <Tabs.Screen name="dashboard"        options={{ href: null }} />
       <Tabs.Screen name="soal/bulk"        options={{ href: null }} />
       <Tabs.Screen name="soal/[modulId]"   options={{ href: null }} />
       <Tabs.Screen name="assessment/index" options={{ href: null }} />
       <Tabs.Screen name="assessment/hasil" options={{ href: null }} />
+      <Tabs.Screen name="assessment/detail-jawaban" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -74,24 +74,13 @@ export default function GuruDashboard() {
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/assessment')} activeOpacity={0.85}>
-          <View style={[styles.menuIcon, { backgroundColor: '#EBF4FF' }]}>
-            <Ionicons name="clipboard" size={28} color={Colors.primary} />
-          </View>
-          <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>Kelola Assessment</Text>
-            <Text style={styles.menuDesc}>Buat, edit, dan hapus ujian untuk siswa</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/activity-log')} activeOpacity={0.85}>
+<TouchableOpacity style={styles.menuCard} onPress={() => router.push('/(guru)/activity-log')} activeOpacity={0.85}>
           <View style={[styles.menuIcon, { backgroundColor: '#FFF0F0' }]}>
             <Ionicons name="alert-circle" size={28} color={Colors.danger} />
           </View>
           <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>Activity Log</Text>
-            <Text style={styles.menuDesc}>Rekam jejak pelanggaran siswa saat ujian</Text>
+            <Text style={styles.menuTitle}>Log Pelanggaran</Text>
+            <Text style={styles.menuDesc}>Rekam jejak keluar aplikasi siswa saat ujian</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>

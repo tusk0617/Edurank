@@ -159,7 +159,7 @@ export default function GuruAssessment() {
               </View>
               <TouchableOpacity
                 style={s.hasilBtn}
-                onPress={() => router.push({ pathname: '/(guru)/assessment/hasil', params: { assessmentId: item.id, judulAssessment: item.judul } })}
+                onPress={() => router.push({ pathname: '/guru-pages/hasil', params: { assessmentId: item.id, judulAssessment: item.judul } })}
                 activeOpacity={0.85}
               >
                 <Ionicons name="people-outline" size={15} color={Colors.primary} />

@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, router } from 'expo-router';
+import { useAuth } from '../../../context/AuthContext';
 import {
   getGuruSoal, createSoal, updateSoal, deleteSoal,
   getGuruAssessment, createAssessment, updateAssessment, deleteAssessment,
@@ -295,7 +296,7 @@ function AssessmentView({ soalBank, loading, refreshing, onRefresh }) {
               {/* Tombol hasil */}
               <TouchableOpacity
                 style={s.hasilBtn}
-                onPress={() => router.push({ pathname: '/(guru)/assessment/hasil', params: { assessmentId: item.id, judulAssessment: item.judul } })}
+                onPress={() => router.push({ pathname: '/guru-pages/hasil', params: { assessmentId: item.id, judulAssessment: item.judul } })}
                 activeOpacity={0.85}
               >
                 <Ionicons name="people-outline" size={15} color={Colors.primary} />
@@ -420,10 +421,18 @@ function AssessmentView({ soalBank, loading, refreshing, onRefresh }) {
 
 // ─── Root screen ─────────────────────────────────────────────────────────────
 export default function KelolaScreen() {
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('soal');
   const [soalList, setSoalList]   = useState([]);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert('Keluar', 'Yakin ingin keluar?', [
+      { text: 'Batal', style: 'cancel' },
+      { text: 'Keluar', style: 'destructive', onPress: async () => { await logout(); router.replace('/login'); } },
+    ]);
+  };
 
   const fetchSoal = useCallback(async () => {
     try {
@@ -445,7 +454,13 @@ export default function KelolaScreen() {
     <SafeAreaView style={s.safe}>
       {/* Page header */}
       <View style={s.pageHeader}>
-        <Text style={s.pageTitle}>Kelola Soal</Text>
+        <View>
+          <Text style={s.pageTitle}>Kelola Soal</Text>
+          <Text style={s.pageSubtitle}>{user?.nama || 'Guru'}</Text>
+        </View>
+        <TouchableOpacity onPress={handleLogout} style={s.logoutBtn}>
+          <Ionicons name="log-out-outline" size={22} color={Colors.danger} />
+        </TouchableOpacity>
       </View>
 
       {/* Segment control */}
@@ -487,12 +502,14 @@ const s = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
 
   pageHeader: {
-    flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 12,
     backgroundColor: Colors.card,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
-  pageTitle: { fontSize: 18, fontWeight: '800', color: Colors.text, flex: 1 },
+  pageTitle: { fontSize: 18, fontWeight: '800', color: Colors.text },
+  pageSubtitle: { fontSize: 11, color: Colors.muted, marginTop: 1 },
+  logoutBtn: { padding: 6 },
 
   // Segment
   segmentWrap: {

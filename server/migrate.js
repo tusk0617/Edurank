@@ -28,10 +28,22 @@ async function migrate() {
     await pool.query(`ALTER TABLE hasil_assessment MODIFY COLUMN status VARCHAR(20) DEFAULT 'berlangsung'`);
   } catch (e) { /* abaikan jika sudah VARCHAR */ }
 
+  // Tabel log keluar aplikasi (structured exit timing)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS log_keluar_aplikasi (
+      id                  INT AUTO_INCREMENT PRIMARY KEY,
+      hasil_id            INT NOT NULL,
+      waktu_keluar        DATETIME NOT NULL,
+      waktu_kembali       DATETIME NULL,
+      durasi_diluar_detik INT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+
   // Kolom tambahan di hasil_assessment
   const haColumns = [
-    { col: 'percobaan_ke', sql: 'ADD COLUMN percobaan_ke INT DEFAULT 1' },
-    { col: 'terlambat',    sql: 'ADD COLUMN terlambat TINYINT(1) DEFAULT 0' },
+    { col: 'percobaan_ke',   sql: 'ADD COLUMN percobaan_ke INT DEFAULT 1' },
+    { col: 'terlambat',      sql: 'ADD COLUMN terlambat TINYINT(1) DEFAULT 0' },
+    { col: 'jumlah_keluar',  sql: 'ADD COLUMN jumlah_keluar INT DEFAULT 0' },
   ];
   for (const { col, sql } of haColumns) {
     try {

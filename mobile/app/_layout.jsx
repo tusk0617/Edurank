@@ -13,6 +13,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(guru)" />
           <Stack.Screen name="assessment/[id]" />
+          <Stack.Screen name="guru-pages" />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

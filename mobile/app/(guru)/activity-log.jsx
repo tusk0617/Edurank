@@ -64,8 +64,8 @@ export default function ActivityLog() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Activity Log</Text>
-        <Text style={styles.headerSub}>Tab switch terdeteksi saat ujian</Text>
+        <Text style={styles.headerTitle}>Log Pelanggaran</Text>
+        <Text style={styles.headerSub}>Keluar aplikasi tercatat saat ujian</Text>
       </View>
 
       <ScrollView

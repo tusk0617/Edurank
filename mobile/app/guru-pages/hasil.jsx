@@ -5,8 +5,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
-import { getGuruAssessmentHasil } from '../../../services/api';
-import Colors from '../../../constants/Colors';
+import { getGuruAssessmentHasil } from '../../services/api';
+import Colors from '../../constants/Colors';
 
 function fmtDurasi(detik) {
   if (!detik) return '-';
@@ -28,6 +28,7 @@ export default function HasilAssessment() {
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
+    if (!assessmentId) { router.back(); return; }
     try {
       const res = await getGuruAssessmentHasil(assessmentId);
       setData(res.data);
@@ -99,7 +100,7 @@ export default function HasilAssessment() {
               style={s.card}
               activeOpacity={0.8}
               onPress={() => router.push({
-                pathname: '/(guru)/assessment/detail-jawaban',
+                pathname: '/guru-pages/detail-jawaban',
                 params: { hasilId: item.id, namaSiswa: item.nama },
               })}
             >

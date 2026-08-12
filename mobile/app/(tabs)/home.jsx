@@ -111,10 +111,8 @@ export default function SiswaHome() {
 
               {selesai ? (
                 <View style={s.selesaiRow}>
-                  <Text style={s.selesaiText}>
-                    Ujian selesai — Skor:{' '}
-                    <Text style={s.skorText}>{Math.round(item.skor || 0)}</Text>
-                  </Text>
+                  <Ionicons name="checkmark-circle" size={16} color={Colors.secondary} />
+                  <Text style={s.selesaiText}>Sudah dikerjakan</Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -158,9 +156,8 @@ const s = StyleSheet.create({
   infoRow: { flexDirection: 'row', gap: 14, flexWrap: 'wrap', marginBottom: 12 },
   infoItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   infoText: { fontSize: 12, color: Colors.muted },
-  selesaiRow: { padding: 10, backgroundColor: '#F0FDF4', borderRadius: 10, alignItems: 'center' },
+  selesaiRow: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, backgroundColor: '#F0FDF4', borderRadius: 10, justifyContent: 'center' },
   selesaiText: { fontSize: 13, color: Colors.secondary, fontWeight: '600' },
-  skorText: { fontSize: 16, fontWeight: '800' },
   mulaiBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: Colors.secondary, borderRadius: 10, paddingVertical: 12,
