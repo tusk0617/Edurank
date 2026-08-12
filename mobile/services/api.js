@@ -50,7 +50,6 @@ api.interceptors.response.use(
 // Auth
 export const login = (username, password) => api.post('/api/auth/login', { username, password });
 export const getMe = () => api.get('/api/auth/me');
-export const changePassword = (data) => api.put('/api/auth/change-password', data);
 
 // Guru — Soal
 export const getGuruSoal    = ()       => api.get('/api/guru/soal');

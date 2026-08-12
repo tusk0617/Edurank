@@ -1,27 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  RefreshControl, ActivityIndicator, Alert, Modal, TextInput,
+  RefreshControl, ActivityIndicator, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
-import { changePassword } from '../../services/api';
 import Colors from '../../constants/Colors';
 
 export default function GuruDashboard() {
   const { user, logout } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]       = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [gantiPassModal, setGantiPassModal] = useState(false);
-  const [passLama, setPassLama] = useState('');
-  const [passBaru, setPassBaru] = useState('');
-  const [passKonfirmasi, setPassKonfirmasi] = useState('');
-  const [showPassLama, setShowPassLama] = useState(false);
-  const [showPassBaru, setShowPassBaru] = useState(false);
-  const [showPassKonfirmasi, setShowPassKonfirmasi] = useState(false);
-  const [savingPass, setSavingPass] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(false);
@@ -29,33 +20,6 @@ export default function GuruDashboard() {
   }, []);
 
   useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
-
-  const handleGantiPassword = async () => {
-    if (!passLama || !passBaru || !passKonfirmasi) {
-      Alert.alert('Perhatian', 'Semua kolom wajib diisi');
-      return;
-    }
-    if (passBaru !== passKonfirmasi) {
-      Alert.alert('Perhatian', 'Konfirmasi password tidak cocok');
-      return;
-    }
-    if (passBaru.length < 6) {
-      Alert.alert('Perhatian', 'Password baru minimal 6 karakter');
-      return;
-    }
-    setSavingPass(true);
-    try {
-      await changePassword({ password_lama: passLama, password_baru: passBaru });
-      setGantiPassModal(false);
-      setPassLama(''); setPassBaru(''); setPassKonfirmasi('');
-      Alert.alert('Berhasil', 'Password berhasil diubah');
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Gagal mengubah password';
-      Alert.alert('Gagal', msg);
-    } finally {
-      setSavingPass(false);
-    }
-  };
 
   const handleLogout = () => {
     Alert.alert('Keluar', 'Yakin ingin keluar?', [
@@ -105,7 +69,7 @@ export default function GuruDashboard() {
           </View>
           <View style={styles.menuInfo}>
             <Text style={styles.menuTitle}>Kelola Soal</Text>
-            <Text style={styles.menuDesc}>Tambah, edit, dan hapus soal ujian per modul</Text>
+            <Text style={styles.menuDesc}>Tambah, edit, dan hapus soal ujian</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>
@@ -127,83 +91,11 @@ export default function GuruDashboard() {
           </View>
           <View style={styles.menuInfo}>
             <Text style={styles.menuTitle}>Activity Log</Text>
-            <Text style={styles.menuDesc}>Rekam jejak pelanggaran siswa saat mengerjakan ujian</Text>
+            <Text style={styles.menuDesc}>Rekam jejak pelanggaran siswa saat ujian</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={Colors.muted} />
         </TouchableOpacity>
-
-        {/* Ganti Password */}
-        <TouchableOpacity style={styles.gantiPassBtn} onPress={() => setGantiPassModal(true)} activeOpacity={0.8}>
-          <Ionicons name="lock-closed-outline" size={20} color={Colors.primary} />
-          <Text style={styles.gantiPassText}>Ganti Password</Text>
-        </TouchableOpacity>
       </ScrollView>
-
-      {/* Modal Ganti Password */}
-      <Modal visible={gantiPassModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ganti Password</Text>
-              <TouchableOpacity onPress={() => { setGantiPassModal(false); setPassLama(''); setPassBaru(''); setPassKonfirmasi(''); }}>
-                <Ionicons name="close" size={24} color={Colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.passLabel}>Password Lama</Text>
-            <View style={styles.passInputWrap}>
-              <TextInput
-                style={styles.passInput}
-                value={passLama}
-                onChangeText={setPassLama}
-                secureTextEntry={!showPassLama}
-                placeholder="Masukkan password lama"
-                placeholderTextColor={Colors.muted}
-              />
-              <TouchableOpacity onPress={() => setShowPassLama(!showPassLama)} style={styles.eyeBtn}>
-                <Ionicons name={showPassLama ? 'eye-off' : 'eye'} size={18} color={Colors.muted} />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.passLabel}>Password Baru</Text>
-            <View style={styles.passInputWrap}>
-              <TextInput
-                style={styles.passInput}
-                value={passBaru}
-                onChangeText={setPassBaru}
-                secureTextEntry={!showPassBaru}
-                placeholder="Minimal 6 karakter"
-                placeholderTextColor={Colors.muted}
-              />
-              <TouchableOpacity onPress={() => setShowPassBaru(!showPassBaru)} style={styles.eyeBtn}>
-                <Ionicons name={showPassBaru ? 'eye-off' : 'eye'} size={18} color={Colors.muted} />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.passLabel}>Konfirmasi Password Baru</Text>
-            <View style={styles.passInputWrap}>
-              <TextInput
-                style={styles.passInput}
-                value={passKonfirmasi}
-                onChangeText={setPassKonfirmasi}
-                secureTextEntry={!showPassKonfirmasi}
-                placeholder="Ulangi password baru"
-                placeholderTextColor={Colors.muted}
-              />
-              <TouchableOpacity onPress={() => setShowPassKonfirmasi(!showPassKonfirmasi)} style={styles.eyeBtn}>
-                <Ionicons name={showPassKonfirmasi ? 'eye-off' : 'eye'} size={18} color={Colors.muted} />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity style={styles.savePassBtn} onPress={handleGantiPassword} disabled={savingPass} activeOpacity={0.85}>
-              {savingPass
-                ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.savePassText}>Simpan Password</Text>
-              }
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -235,26 +127,4 @@ const styles = StyleSheet.create({
   menuInfo: { flex: 1 },
   menuTitle: { fontSize: 15, fontWeight: '700', color: Colors.text },
   menuDesc: { fontSize: 12, color: Colors.muted, marginTop: 2 },
-  gantiPassBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    marginTop: 8, padding: 14, borderRadius: 10,
-    borderWidth: 1.5, borderColor: Colors.primary + '60', backgroundColor: Colors.primary + '10',
-  },
-  gantiPassText: { color: Colors.primary, fontWeight: '700', fontSize: 15 },
-  modalOverlay: { flex: 1, backgroundColor: '#00000060', justifyContent: 'flex-end' },
-  modalBox: {
-    backgroundColor: Colors.card, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 24, paddingBottom: 36,
-  },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
-  passLabel: { fontSize: 13, fontWeight: '600', color: Colors.text, marginBottom: 6, marginTop: 14 },
-  passInputWrap: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: Colors.border, borderRadius: 10, backgroundColor: Colors.background },
-  passInput: { flex: 1, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: Colors.text },
-  eyeBtn: { padding: 12 },
-  savePassBtn: {
-    backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 15,
-    alignItems: 'center', marginTop: 24,
-  },
-  savePassText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });
