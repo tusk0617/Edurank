@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  Alert, Modal, ActivityIndicator, AppState, BackHandler,
+  Alert, Modal, ActivityIndicator, AppState, BackHandler, FlatList,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getSoal, submitAssessment, logActivity } from '../../services/api';
+import { getSoal, submitAssessment, logActivity, logKeluar, logKembali } from '../../services/api';
 import Colors from '../../constants/Colors';
 
 const KEYS = ['a', 'b', 'c', 'd'];
 const LABELS = ['A', 'B', 'C', 'D'];
 
 function fmtTime(sec) {
+  if (!Number.isFinite(sec) || sec < 0) return '00:00';
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
@@ -27,35 +29,164 @@ function fmtDurasi(sec) {
 
 export default function AssessmentScreen() {
   const { id, judul } = useLocalSearchParams();
+  const STORAGE_KEY      = `asm_progress_${id}`;
+  const PENDING_LOGS_KEY = `asm_pending_logs_${id}`;
+
   const [loading, setLoading] = useState(true);
   const [soalList, setSoalList] = useState([]);
   const [sesiId, setSesiId] = useState(null);
   const [judulAsm, setJudulAsm] = useState(judul || '');
-  const [jawaban, setJawaban] = useState({});
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const [jawaban, setJawabanState] = useState({});
+  const [currentIdx, setCurrentIdxState] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [violations, setViolations] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [warningVisible, setWarningVisible] = useState(false);
+  const [savedIndicator, setSavedIndicator] = useState(false);
 
-  const sesiRef = useRef(null);
-  const violationsRef = useRef(0);
-  const appStateRef = useRef(AppState.currentState);
-  const timerRef = useRef(null);
-  const resultRef = useRef(false);
+  // Refs untuk akses stale-closure-safe di callback async
+  const sesiRef          = useRef(null);
+  const jawabanRef       = useRef({});
+  const currentIdxRef    = useRef(0);
+  const soalRef          = useRef([]);
+  const timeLeftRef      = useRef(0);         // sisa waktu (sync dengan state)
+  const violationsRef    = useRef(0);
+  const appStateRef      = useRef(AppState.currentState);
+  const timerRef         = useRef(null);
+  const resultRef        = useRef(false);
+  const saveTimerRef     = useRef(null);
+  const indicatorTimer   = useRef(null);
+  const currentLogId     = useRef(null);      // log_id untuk PATCH /log-keluar
+  const pendingLogs      = useRef([]);        // antrian offline log-keluar
+  const bgEnteredAt      = useRef(null);      // timestamp masuk background (untuk koreksi timer)
 
-  useEffect(() => { loadSoal(); }, []);
+  // Wrapper setter: sinkronisasi state + ref
+  const setJawaban = useCallback((updater) => {
+    setJawabanState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      jawabanRef.current = next;
+      return next;
+    });
+  }, []);
 
-  const loadSoal = async () => {
+  const setCurrentIdx = useCallback((updater) => {
+    setCurrentIdxState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      currentIdxRef.current = next;
+      return next;
+    });
+  }, []);
+
+  // ── Simpan progres ke AsyncStorage ──────────────────────────────────────────
+  const doSave = useCallback(async () => {
+    if (!sesiRef.current || resultRef.current) return;
     try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
+        sesi_id:    sesiRef.current,
+        soal:       soalRef.current,
+        jawaban:    jawabanRef.current,
+        currentIdx: currentIdxRef.current,
+        violations: violationsRef.current,  // simpan jumlah pelanggaran
+      }));
+      setSavedIndicator(true);
+      clearTimeout(indicatorTimer.current);
+      indicatorTimer.current = setTimeout(() => setSavedIndicator(false), 2000);
+    } catch (_) {}
+  }, [STORAGE_KEY]);
+
+  const scheduleSave = useCallback(() => {
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(doSave, 3000);
+  }, [doSave]);
+
+  // ── Simpan/load pending logs ke AsyncStorage ─────────────────────────────────
+  const savePendingLogs = useCallback(async () => {
+    try {
+      if (pendingLogs.current.length > 0) {
+        await AsyncStorage.setItem(PENDING_LOGS_KEY, JSON.stringify(pendingLogs.current));
+      } else {
+        await AsyncStorage.removeItem(PENDING_LOGS_KEY);
+      }
+    } catch (_) {}
+  }, [PENDING_LOGS_KEY]);
+
+  const loadPendingLogs = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(PENDING_LOGS_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (Array.isArray(saved) && saved.length > 0) {
+          pendingLogs.current = [...pendingLogs.current, ...saved];
+        }
+      }
+    } catch (_) {}
+  }, [PENDING_LOGS_KEY]);
+
+  // ── Flush antrian log offline ────────────────────────────────────────────────
+  const flushPendingLogs = useCallback(async (waktu_kembali = null) => {
+    if (pendingLogs.current.length === 0) return;
+    const queue = [...pendingLogs.current];
+    pendingLogs.current = [];
+    for (const pending of queue) {
+      try {
+        const payload = { sesi_id: pending.sesi_id, waktu_keluar: pending.waktu_keluar };
+        if (waktu_kembali) payload.waktu_kembali = waktu_kembali;
+        await logKeluar(payload);
+      } catch {
+        pendingLogs.current.push(pending); // masih offline, simpan kembali
+      }
+    }
+    await savePendingLogs(); // update AsyncStorage setelah flush
+  }, [savePendingLogs]);
+
+  // ── Load soal + restore dari AsyncStorage ───────────────────────────────────
+  const loadSoal = async () => {
+    await loadPendingLogs(); // restore pending logs yang belum terkirim
+    try {
+      // Coba ambil progres tersimpan
+      let stored = null;
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEY);
+        if (raw) stored = JSON.parse(raw);
+      } catch (_) {}
+
+      // Ambil sesi dari backend (lanjut atau baru)
       const res = await getSoal(id);
-      const { sesi_id, soal, durasi_menit, judul: j } = res.data;
-      setSoalList(soal);
-      setSesiId(sesi_id);
+      const { sesi_id, soal, durasi_menit, judul: j, waktu_mulai } = res.data;
+
       sesiRef.current = sesi_id;
+      setSesiId(sesi_id);
       setJudulAsm(j || judul || '');
-      setTimeLeft(durasi_menit * 60);
+
+      // Hitung sisa waktu berdasarkan waktu_mulai dari server (selalu akurat)
+      const startMs = waktu_mulai ? new Date(waktu_mulai).getTime() : NaN;
+      const elapsedSec = Number.isFinite(startMs) ? Math.floor((Date.now() - startMs) / 1000) : 0;
+      const computedTimeLeft = Math.max(0, (durasi_menit || 0) * 60 - elapsedSec);
+      setTimeLeft(computedTimeLeft);
+      timeLeftRef.current = computedTimeLeft;
+
+      // Restore progres jika sesi sama dan data valid
+      if (stored && stored.sesi_id === sesi_id && stored.soal?.length > 0) {
+        soalRef.current = stored.soal;
+        setSoalList(stored.soal);
+        setJawaban(stored.jawaban || {});
+        setCurrentIdx(stored.currentIdx || 0);
+
+        // Pulihkan jumlah pelanggaran dan tampilkan peringatan
+        const restoredViolations = stored.violations || 0;
+        if (restoredViolations > 0) {
+          violationsRef.current = restoredViolations;
+          setViolations(restoredViolations);
+          setWarningVisible(true);  // tampilkan satu kali peringatan keluar
+        }
+      } else {
+        if (stored) AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
+        soalRef.current = soal;
+        setSoalList(soal);
+        setJawaban({});
+        setCurrentIdx(0);
+      }
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal memuat soal';
       Alert.alert('Error', msg, [{ text: 'Kembali', onPress: () => router.back() }]);
@@ -64,50 +195,105 @@ export default function AssessmentScreen() {
     }
   };
 
-  // Timer countdown
+  useEffect(() => { loadSoal(); }, []);
+
+  // ── Timer countdown ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (loading || result) return;
+    if (timeLeft === 0) {
+      if (!resultRef.current) doSubmit(true);
+      return;
+    }
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
+        const next = prev - 1;
+        timeLeftRef.current = next;
+        if (next <= 0) {
           clearInterval(timerRef.current);
           if (!resultRef.current) doSubmit(true);
           return 0;
         }
-        return prev - 1;
+        return next;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
   }, [loading, result]);
 
-  // AppState — deteksi keluar app
-  useEffect(() => {
-    if (loading) return;
-    const sub = AppState.addEventListener('change', handleAppStateChange);
-    return () => sub.remove();
-  }, [loading, sesiId]);
-
+  // ── AppState: deteksi keluar & kembali ke aplikasi ──────────────────────────
   const handleAppStateChange = useCallback((nextState) => {
     const prev = appStateRef.current;
     appStateRef.current = nextState;
     if (resultRef.current) return;
 
     if (prev === 'active' && (nextState === 'background' || nextState === 'inactive')) {
+      bgEnteredAt.current = Date.now();
       violationsRef.current += 1;
       setViolations(violationsRef.current);
+
+      clearTimeout(saveTimerRef.current);
+      doSave();
+
+      console.log('[AppState] KELUAR — sesiRef:', sesiRef.current, '| violations:', violationsRef.current);
+
       if (sesiRef.current) {
+        const waktu_keluar = new Date().toISOString();
+
         logActivity(id, {
           sesi_id: sesiRef.current,
           jenis: 'app_background',
           keterangan: `Keluar dari aplikasi (pelanggaran ke-${violationsRef.current})`,
-        }).catch(() => {});
+        }).catch(err => console.log('[logActivity] GAGAL:', err?.response?.status, err?.message));
+
+        console.log('[logKeluar] KIRIM sesi_id:', sesiRef.current, 'waktu_keluar:', waktu_keluar);
+        logKeluar({ sesi_id: sesiRef.current, waktu_keluar })
+          .then(res2 => {
+            currentLogId.current = res2.data.log_id;
+            console.log('[logKeluar] SUKSES log_id:', res2.data.log_id);
+          })
+          .catch(err => {
+            console.log('[logKeluar] GAGAL:', err?.response?.status, err?.response?.data, err?.message);
+            pendingLogs.current.push({ sesi_id: sesiRef.current, waktu_keluar });
+            savePendingLogs();
+          });
+      } else {
+        console.log('[AppState] sesiRef NULL — log tidak dikirim');
       }
     } else if (nextState === 'active' && (prev === 'background' || prev === 'inactive')) {
-      setWarningVisible(true);
-    }
-  }, [id]);
+      // Koreksi timer: kurangi waktu yang berlalu selama background
+      if (bgEnteredAt.current) {
+        const bgElapsed = Math.floor((Date.now() - bgEnteredAt.current) / 1000);
+        bgEnteredAt.current = null;
+        const corrected = Math.max(0, timeLeftRef.current - bgElapsed);
+        timeLeftRef.current = corrected;
+        setTimeLeft(corrected);
+        if (corrected === 0 && !resultRef.current) {
+          clearInterval(timerRef.current);
+          doSubmit(true);
+          return;
+        }
+      }
 
-  // Cegah tombol back Android saat ujian berlangsung
+      setWarningVisible(true);
+      const waktu_kembali = new Date().toISOString();
+
+      console.log('[AppState] KEMBALI — pendingLogs:', pendingLogs.current.length, '| currentLogId:', currentLogId.current);
+      flushPendingLogs(waktu_kembali).catch(err => console.log('[flushPendingLogs] GAGAL:', err?.message));
+
+      if (currentLogId.current) {
+        logKembali(currentLogId.current, { waktu_kembali })
+          .then(() => { currentLogId.current = null; console.log('[logKembali] SUKSES'); })
+          .catch(err => console.log('[logKembali] GAGAL:', err?.response?.status, err?.message));
+      }
+    }
+  }, [id, doSave, flushPendingLogs]);
+
+  useEffect(() => {
+    if (loading) return;
+    const sub = AppState.addEventListener('change', handleAppStateChange);
+    return () => sub.remove();
+  }, [loading, handleAppStateChange]);
+
+  // ── Cegah back button Android saat ujian ────────────────────────────────────
   useEffect(() => {
     if (loading || result) return;
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -120,23 +306,33 @@ export default function AssessmentScreen() {
     return () => handler.remove();
   }, [loading, result]);
 
+  // ── Aksi ────────────────────────────────────────────────────────────────────
   const pilihJawaban = (key) => {
-    const soalId = soalList[currentIdx]?.id;
+    const soalId = soalRef.current[currentIdxRef.current]?.id;
     if (!soalId) return;
     setJawaban(prev => ({ ...prev, [soalId]: key }));
+    scheduleSave();
   };
 
   const doSubmit = async (auto = false) => {
     clearInterval(timerRef.current);
+    clearTimeout(saveTimerRef.current);
     resultRef.current = true;
     setSubmitting(true);
     try {
-      const jawabanArr = soalList
-        .filter(s => jawaban[s.id])
-        .map(s => ({ soal_id: s.id, jawaban: jawaban[s.id] }));
+      // Flush pending logs sebelum submit agar jumlah_keluar tercatat
+      if (pendingLogs.current.length > 0) {
+        await flushPendingLogs().catch(() => {});
+      }
+
+      const jawabanArr = soalRef.current
+        .filter(s => jawabanRef.current[s.id])
+        .map(s => ({ soal_id: s.id, jawaban: jawabanRef.current[s.id] }));
 
       const res = await submitAssessment(id, { sesi_id: sesiRef.current, jawaban: jawabanArr });
       setResult(res.data);
+      AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
+      AsyncStorage.removeItem(PENDING_LOGS_KEY).catch(() => {});
     } catch (err) {
       resultRef.current = false;
       Alert.alert('Gagal Submit', err.response?.data?.message || 'Terjadi kesalahan');
@@ -146,7 +342,7 @@ export default function AssessmentScreen() {
   };
 
   const handleSubmit = () => {
-    const belumDijawab = soalList.filter(s => !jawaban[s.id]).length;
+    const belumDijawab = soalRef.current.filter(s => !jawabanRef.current[s.id]).length;
     if (belumDijawab > 0) {
       Alert.alert(
         'Soal Belum Dijawab',
@@ -161,7 +357,7 @@ export default function AssessmentScreen() {
     }
   };
 
-  // Loading
+  // ── Render ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <View style={s.center}>
@@ -171,7 +367,6 @@ export default function AssessmentScreen() {
     );
   }
 
-  // Halaman hasil
   if (result) {
     const skor = Math.round(result.skor);
     const skorColor = skor >= 80 ? Colors.secondary : skor >= 60 ? Colors.warning : Colors.danger;
@@ -183,7 +378,7 @@ export default function AssessmentScreen() {
             <Text style={s.resultJudul}>{judulAsm}</Text>
             <View style={[s.skorCircle, { borderColor: skorColor }]}>
               <Text style={[s.skorNumber, { color: skorColor }]}>{skor}</Text>
-              <Text style={s.skorLabel}>Skor</Text>
+              <Text style={s.skorLabel}>Nilai</Text>
             </View>
             <View style={s.resultInfoRow}>
               <View style={s.resultInfoItem}>
@@ -220,6 +415,12 @@ export default function AssessmentScreen() {
           <Text style={s.progressText}>{dijawab}/{soalList.length} dijawab</Text>
         </View>
         <View style={s.headerRight}>
+          {savedIndicator && (
+            <View style={s.savedBadge}>
+              <Ionicons name="checkmark-circle" size={12} color={Colors.secondary} />
+              <Text style={s.savedText}>Tersimpan</Text>
+            </View>
+          )}
           {violations > 0 && (
             <View style={s.violationBadge}>
               <Ionicons name="warning" size={12} color="#fff" />
@@ -266,11 +467,45 @@ export default function AssessmentScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
+      {/* Nomor soal navigator */}
+      <View style={s.soalNav}>
+        <FlatList
+          data={soalList}
+          horizontal
+          keyExtractor={(_, i) => i.toString()}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={s.soalNavContent}
+          renderItem={({ item, index }) => {
+            const isActive   = index === currentIdx;
+            const isDijawab  = !!jawaban[item.id];
+            return (
+              <TouchableOpacity
+                style={[
+                  s.soalNumBtn,
+                  isDijawab && s.soalNumBtnDijawab,
+                  isActive   && s.soalNumBtnActive,
+                ]}
+                onPress={() => { setCurrentIdx(index); scheduleSave(); }}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  s.soalNumBtnText,
+                  isDijawab && s.soalNumBtnTextDijawab,
+                  isActive   && s.soalNumBtnTextActive,
+                ]}>
+                  {index + 1}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
+
       {/* Navigasi */}
       <View style={s.navBar}>
         <TouchableOpacity
           style={[s.navBtn, currentIdx === 0 && s.navBtnDisabled]}
-          onPress={() => setCurrentIdx(i => Math.max(0, i - 1))}
+          onPress={() => { setCurrentIdx(i => Math.max(0, i - 1)); scheduleSave(); }}
           disabled={currentIdx === 0}
           activeOpacity={0.7}
         >
@@ -287,7 +522,7 @@ export default function AssessmentScreen() {
         ) : (
           <TouchableOpacity
             style={s.navBtn}
-            onPress={() => setCurrentIdx(i => Math.min(soalList.length - 1, i + 1))}
+            onPress={() => { setCurrentIdx(i => Math.min(soalList.length - 1, i + 1)); scheduleSave(); }}
             activeOpacity={0.7}
           >
             <Text style={s.navBtnText}>Berikutnya</Text>
@@ -329,6 +564,12 @@ const s = StyleSheet.create({
   headerJudul: { fontSize: 15, fontWeight: '700', color: Colors.text },
   progressText: { fontSize: 11, color: Colors.muted, marginTop: 2 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  savedBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: Colors.secondary + '20', borderRadius: 8,
+    paddingHorizontal: 7, paddingVertical: 3,
+  },
+  savedText: { fontSize: 10, color: Colors.secondary, fontWeight: '600' },
   violationBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
     backgroundColor: Colors.danger, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3,
@@ -370,6 +611,30 @@ const s = StyleSheet.create({
   opsiLabelTxt: { fontSize: 13, fontWeight: '700', color: Colors.muted },
   opsiTeks: { flex: 1, fontSize: 14, color: Colors.text, lineHeight: 20 },
   opsiTeksSelected: { color: Colors.secondary, fontWeight: '600' },
+
+  soalNav: {
+    backgroundColor: Colors.card,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+    paddingVertical: 10,
+  },
+  soalNavContent: { paddingHorizontal: 12, gap: 8 },
+  soalNumBtn: {
+    width: 36, height: 36, borderRadius: 10,
+    justifyContent: 'center', alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderWidth: 1.5, borderColor: Colors.border,
+  },
+  soalNumBtnDijawab: {
+    backgroundColor: Colors.secondary + '20',
+    borderColor: Colors.secondary,
+  },
+  soalNumBtnActive: {
+    backgroundColor: Colors.secondary,
+    borderColor: Colors.secondary,
+  },
+  soalNumBtnText: { fontSize: 13, fontWeight: '700', color: Colors.muted },
+  soalNumBtnTextDijawab: { color: Colors.secondary },
+  soalNumBtnTextActive: { color: '#fff' },
 
   navBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
